@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.env
+
+# Data and Models
+data/synthetic/*
+!data/synthetic/samples/
+models/*
+!models/.gitkeep
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests and Coverage
+.pytest_cache/
+htmlcov/
+.coverage
