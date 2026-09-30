@@ -8,7 +8,9 @@ from app.core.db import Base
 class SchemeApplication(Base):
     __tablename__ = "scheme_applications"
     id = Column(Integer, primary_key=True, index=True)
-    farmer_profile_id = Column(Integer, ForeignKey("farmer_profiles.id"), nullable=False)
+    farmer_profile_id = Column(
+        Integer, ForeignKey("farmer_profiles.id"), nullable=False
+    )
     scheme_id = Column(Integer, ForeignKey("schemes.id"), nullable=False)
     status = Column(String, nullable=False)
     form_data = Column(JSONB)

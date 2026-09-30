@@ -11,10 +11,8 @@ class Flag(Base):
     type = Column(String, nullable=False)
     severity = Column(String, nullable=False)
     reason = Column(String, nullable=False)
-    status = Column(String, nullable=False) # open / confirmed / dismissed
+    status = Column(String, nullable=False)  # open / confirmed / dismissed
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     resolved_by = Column(Integer, ForeignKey("users.id"))
-    
-    __table_args__ = (
-        Index("ix_flags_status_type", "status", "type"),
-    )
+
+    __table_args__ = (Index("ix_flags_status_type", "status", "type"),)

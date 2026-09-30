@@ -10,7 +10,7 @@ class MatchCandidate(Base):
     record_a = Column(Integer, ForeignKey("clean_records.id"), nullable=False)
     record_b = Column(Integer, ForeignKey("clean_records.id"), nullable=False)
     score = Column(Float, nullable=False)
-    decision = Column(String, nullable=False) # auto_link / review / no_match
+    decision = Column(String, nullable=False)  # auto_link / review / no_match
     features_json = Column(JSONB)
     reviewed_by = Column(Integer, ForeignKey("users.id"))
     reviewed_at = Column(DateTime(timezone=True))
