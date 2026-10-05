@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routers.auth import router as auth_router
+from app.api.routers.farmers import router as farmers_router
 from app.api.routers.pipeline import router as pipeline_router
 
 app = FastAPI(title="Agri Beneficiary Intelligence API")
@@ -13,6 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+app.include_router(farmers_router)
 app.include_router(pipeline_router)
 
 
