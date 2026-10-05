@@ -5,8 +5,9 @@ alembic
 psycopg2-binary
 pydantic>=2
 pydantic-settings
-pyjwt
-passlib[bcrypt]
+python-jose[cryptography]
+bcrypt
+pydantic[email]
 python-multipart
 pandas
 numpy
