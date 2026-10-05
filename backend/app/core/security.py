@@ -5,24 +5,24 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
 
 def hash_password(plain: str) -> str:
     """Return bcrypt hash of the given plaintext password."""
-    return _pwd_context.hash(plain)
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(plain.encode("utf-8"), salt)
+    return hashed_bytes.decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     """Return True if plain matches the stored bcrypt hash."""
-    return _pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
 
 def create_token(data: dict[str, Any], expires_minutes: int | None = None) -> str:
