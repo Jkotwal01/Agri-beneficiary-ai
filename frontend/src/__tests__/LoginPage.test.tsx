@@ -7,7 +7,6 @@
  * 4. After login, redirects to /dashboard (officer) or /me (farmer).
  */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
