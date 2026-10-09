@@ -11,6 +11,7 @@ from app.api.deps import get_db
 from app.schemas.pipeline import PipelineResponse
 from app.services.ingestion_service import IngestionService
 from app.services.preprocessing_service import PreprocessingService
+from app.services.resolution_service import ResolutionService
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
@@ -46,4 +47,20 @@ def preprocess(
 ) -> PipelineResponse:
     """Trigger preprocessing of source_records → clean_records (admin only)."""
     background_tasks.add_task(_run_preprocess, db)
+    return PipelineResponse(status="accepted")
+
+
+def _run_resolve(db: Session) -> None:
+    svc = ResolutionService(db)
+    svc.run()
+    db.close()
+
+
+@router.post("/resolve", response_model=PipelineResponse, status_code=202)
+def resolve(
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> PipelineResponse:
+    """Trigger entity resolution: blocking → scoring → clustering → golden records."""
+    background_tasks.add_task(_run_resolve, db)
     return PipelineResponse(status="accepted")
