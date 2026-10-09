@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 train_matcher.py — Train the XGBoost pair matcher on sample ground truth.
 
