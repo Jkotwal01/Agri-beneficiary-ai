@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { LayoutDashboard, GitMerge, Flag, LogOut } from "lucide-react";
+import { LayoutDashboard, GitMerge, Flag, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export default function OfficerLayout() {
   const { logout } = useAuthContext();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(true);
 
   const navItems = [
     { name: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
@@ -15,10 +17,14 @@ export default function OfficerLayout() {
   return (
     <div className="flex h-screen bg-background overflow-hidden font-sans">
       {/* Sidebar */}
-      <div className="w-56 bg-surface border-r border-borderline flex flex-col justify-between shrink-0">
+      <div className={`${isOpen ? 'w-56' : 'w-14'} transition-all duration-300 ease-in-out bg-surface border-r border-borderline flex flex-col justify-between shrink-0`}>
         <div>
-          <div className="h-12 border-b border-borderline flex items-center px-4">
-            <h1 className="text-sm font-semibold tracking-tight text-primary">Agri Beneficiary AI</h1>
+          <div className="h-12 border-b border-borderline flex items-center px-4 overflow-hidden whitespace-nowrap">
+            {isOpen ? (
+              <h1 className="text-sm font-semibold tracking-tight text-primary">Agri Beneficiary AI</h1>
+            ) : (
+              <div className="w-6 h-6 bg-slate-100 border border-slate-200 rounded-sm flex items-center justify-center text-xs">🌾</div>
+            )}
           </div>
           <nav className="flex flex-col p-2 space-y-0.5">
             {navItems.map((item) => (
@@ -26,30 +32,46 @@ export default function OfficerLayout() {
                 key={item.name}
                 to={item.to}
                 end={item.to === "/dashboard"}
+                title={item.name}
                 className={({ isActive }) =>
-                  `flex items-center px-2 py-1.5 text-sm rounded-sm font-medium transition-colors ${
+                  `flex items-center px-2 py-2 text-sm rounded-sm font-medium transition-colors overflow-hidden ${
                     isActive
                       ? "bg-slate-100 text-primary"
                       : "text-secondary hover:bg-slate-50 hover:text-primary"
                   }`
                 }
               >
-                <item.icon className="w-4 h-4 mr-2 opacity-75" />
-                {item.name}
+                <item.icon className="w-4 h-4 shrink-0 opacity-75" />
+                <span className={`ml-2 whitespace-nowrap transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                  {item.name}
+                </span>
               </NavLink>
             ))}
           </nav>
         </div>
-        <div className="p-2 border-t border-borderline">
+        <div className="p-2 border-t border-borderline space-y-1">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            title="Toggle Sidebar"
+            className="flex items-center w-full px-2 py-2 text-sm text-secondary hover:bg-slate-50 hover:text-primary rounded-sm transition-colors overflow-hidden"
+          >
+            {isOpen ? <PanelLeftClose className="w-4 h-4 shrink-0 opacity-75" /> : <PanelLeftOpen className="w-4 h-4 shrink-0 opacity-75" />}
+            <span className={`ml-2 whitespace-nowrap transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+              Collapse
+            </span>
+          </button>
           <button
             onClick={() => {
               logout();
               navigate("/login");
             }}
-            className="flex items-center w-full px-2 py-1.5 text-sm text-secondary hover:bg-slate-50 hover:text-primary rounded-sm transition-colors"
+            title="Logout"
+            className="flex items-center w-full px-2 py-2 text-sm text-secondary hover:bg-slate-50 hover:text-primary rounded-sm transition-colors overflow-hidden"
           >
-            <LogOut className="w-4 h-4 mr-2 opacity-75" />
-            Logout
+            <LogOut className="w-4 h-4 shrink-0 opacity-75 text-red-500" />
+            <span className={`ml-2 whitespace-nowrap transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
+              Logout
+            </span>
           </button>
         </div>
       </div>
