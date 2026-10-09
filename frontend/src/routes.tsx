@@ -33,13 +33,22 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
+/** Guard: redirect to dashboard if ALREADY authenticated */
+function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
+  const { token, role } = useAuthContext();
+  if (token) {
+    return <Navigate to={role === "farmer" ? "/me" : "/dashboard"} replace />;
+  }
+  return <>{children}</>;
+}
+
 export function AppRoutes() {
   return (
     <React.Suspense fallback={<div className="h-screen w-screen flex items-center justify-center text-sm font-mono text-secondary bg-background">Loading...</div>}>
       <Routes>
-        {/* Public */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        {/* Public (Guest only) */}
+        <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
 
         {/* Farmer-only */}
         <Route
