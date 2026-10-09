@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
 import { Settings, Save, AlertCircle } from "lucide-react";
 
+type FlagItem = {
+  id: number;
+  farmer_id: number;
+  farmer_name: string;
+  type: string;
+  severity: string;
+  status: string;
+  details: string;
+};
+
 export default function FlagsPage() {
-  const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
+  const [flags, setFlags] = useState<FlagItem[]>([]);
 
   useEffect(() => {
     fetch("/api/flags")
