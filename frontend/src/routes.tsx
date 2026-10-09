@@ -7,10 +7,12 @@ import type { Role } from "./types/auth";
 const LoginPage = React.lazy(() => import("./pages/LoginPage"));
 const RegisterPage = React.lazy(() => import("./pages/RegisterPage"));
 
+const OfficerLayout = React.lazy(() => import("./layouts/OfficerLayout"));
+const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
+const ReviewQueuePage = React.lazy(() => import("./pages/ReviewQueuePage"));
+const FlagsPage = React.lazy(() => import("./pages/FlagsPage"));
+
 // Placeholder pages — replaced by their actual implementation in later phases
-function Dashboard() {
-  return <div style={{ padding: 32 }}><h1>Officer / Admin Dashboard</h1></div>;
-}
 function FarmerProfile() {
   return <div style={{ padding: 32 }}><h1>My Farmer Profile</h1></div>;
 }
@@ -33,7 +35,7 @@ function ProtectedRoute({
 
 export function AppRoutes() {
   return (
-    <React.Suspense fallback={<div>Loading…</div>}>
+    <React.Suspense fallback={<div className="h-screen w-screen flex items-center justify-center text-sm font-mono text-secondary bg-background">Loading...</div>}>
       <Routes>
         {/* Public */}
         <Route path="/login" element={<LoginPage />} />
@@ -54,10 +56,14 @@ export function AppRoutes() {
           path="/dashboard"
           element={
             <ProtectedRoute roles={["officer", "admin"]}>
-              <Dashboard />
+              <OfficerLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="review" element={<ReviewQueuePage />} />
+          <Route path="flags" element={<FlagsPage />} />
+        </Route>
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/login" replace />} />
