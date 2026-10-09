@@ -20,69 +20,90 @@ export default function FlagsPage() {
       .then((data) => setFlags(data.items));
   }, []);
 
-  const yamlConfig = `# schemes.yaml - Eligibility & Duplicate Rules
-PM_KISAN:
-  domain: AGRICULTURE
-  active: true
-  rules:
-    - field: total_land_ha
-      operator: "<="
-      value: 2.0
-      error: "Exceeds marginal farmer threshold"
-    - field: total_land_ha
-      operator: ">"
-      value: 0
-      error: "Must own > 0 land"
-
-PMFBY:
-  domain: AGRICULTURE
-  active: true
-  rules:
-    - field: crop
-      operator: "in"
-      value: ["wheat", "rice", "cotton"]
-      error: "Uninsured crop type"
-`;
-
   return (
     <div className="h-full flex gap-4">
       
-      {/* YAML Configurator */}
-      <div className="w-1/2 bg-primary flex flex-col rounded-sm overflow-hidden border border-primary shadow-xl">
-        <div className="px-3 py-2 bg-slate-800 border-b border-slate-700 flex items-center justify-between">
-          <div className="flex items-center text-xs font-mono text-slate-300">
-            <Settings className="w-3.5 h-3.5 mr-2" />
-            schemes.yaml (Active Engine Config)
+      {/* Visual Rule Builder */}
+      <div className="w-1/2 bg-surface flex flex-col rounded-sm overflow-hidden border border-borderline">
+        <div className="px-3 py-2 bg-slate-50 border-b border-borderline flex items-center justify-between shrink-0">
+          <div className="flex items-center text-sm font-semibold text-primary">
+            <Settings className="w-4 h-4 mr-2 text-secondary" />
+            Eligibility & Validation Rules
           </div>
-          <button className="flex items-center bg-accent-sky hover:bg-sky-500 text-white px-2 py-1 rounded-sm text-[11px] font-semibold transition-colors">
-            <Save className="w-3 h-3 mr-1" /> Deploy Rules
+          <button className="flex items-center bg-accent-sky hover:bg-sky-600 text-white px-2.5 py-1.5 rounded-sm text-xs font-semibold transition-colors">
+            <Save className="w-3.5 h-3.5 mr-1.5" /> Save Changes
           </button>
         </div>
-        <div className="flex-1 p-4 overflow-auto">
-          <pre className="text-[12px] font-mono leading-relaxed text-slate-300">
-            <code>
-{yamlConfig.split('\n').map((line, i) => (
-  <div key={i} className="flex">
-    <span className="w-8 shrink-0 text-slate-600 select-none border-r border-slate-700 mr-4 text-right pr-2">
-      {i + 1}
-    </span>
-    <span>
-      {line.includes('PM_KISAN:') || line.includes('PMFBY:') ? (
-        <span className="text-accent-emerald font-bold">{line}</span>
-      ) : line.includes('rules:') ? (
-        <span className="text-purple-400">{line}</span>
-      ) : line.includes('value:') ? (
-        <span className="text-accent-amber">{line}</span>
-      ) : line.includes('#') ? (
-        <span className="text-slate-500 italic">{line}</span>
-      ) : (
-        <span>{line}</span>
-      )}
-    </span>
-  </div>
-))}
-            </code>
-          </pre>
+        
+        <div className="flex-1 p-4 overflow-auto space-y-6">
+          
+          {/* PM-KISAN Rules */}
+          <div className="border border-borderline rounded-sm overflow-hidden">
+            <div className="bg-slate-50 px-3 py-2 border-b border-borderline flex items-center justify-between">
+              <h4 className="text-xs font-bold text-primary uppercase tracking-wider">PM-KISAN</h4>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-medium text-accent-emerald">Active</span>
+                <div className="w-8 h-4 bg-accent-emerald rounded-full relative shadow-inner">
+                  <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 space-y-3 bg-white">
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-semibold text-secondary w-32">Total Land (Ha)</span>
+                <select className="border border-borderline rounded-sm text-xs px-2 py-1 bg-slate-50 text-primary outline-none">
+                  <option>&lt;= (Less than or equal to)</option>
+                  <option>&gt; (Greater than)</option>
+                  <option>== (Equal to)</option>
+                </select>
+                <input type="number" defaultValue={2.0} className="border border-borderline rounded-sm text-xs px-2 py-1 w-20 bg-slate-50 text-primary outline-none" />
+                <span className="text-[10px] text-red-500 font-medium ml-2 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">Exceeds marginal threshold</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-semibold text-secondary w-32">Total Land (Ha)</span>
+                <select className="border border-borderline rounded-sm text-xs px-2 py-1 bg-slate-50 text-primary outline-none">
+                  <option>&gt; (Greater than)</option>
+                  <option>&lt;= (Less than or equal to)</option>
+                  <option>== (Equal to)</option>
+                </select>
+                <input type="number" defaultValue={0} className="border border-borderline rounded-sm text-xs px-2 py-1 w-20 bg-slate-50 text-primary outline-none" />
+                <span className="text-[10px] text-red-500 font-medium ml-2 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">Must own land</span>
+              </div>
+
+            </div>
+          </div>
+
+          {/* PMFBY Rules */}
+          <div className="border border-borderline rounded-sm overflow-hidden">
+            <div className="bg-slate-50 px-3 py-2 border-b border-borderline flex items-center justify-between">
+              <h4 className="text-xs font-bold text-primary uppercase tracking-wider">PMFBY (Crop Insurance)</h4>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-medium text-accent-emerald">Active</span>
+                <div className="w-8 h-4 bg-accent-emerald rounded-full relative shadow-inner">
+                  <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 space-y-3 bg-white">
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-semibold text-secondary w-32">Crop Type</span>
+                <select className="border border-borderline rounded-sm text-xs px-2 py-1 bg-slate-50 text-primary outline-none">
+                  <option>is one of</option>
+                  <option>is not</option>
+                </select>
+                <input type="text" defaultValue="wheat, rice, cotton" className="border border-borderline rounded-sm text-xs px-2 py-1 flex-1 bg-slate-50 text-primary outline-none" />
+              </div>
+
+            </div>
+          </div>
+
+          <button className="w-full py-2 border-2 border-dashed border-borderline text-secondary text-xs font-semibold rounded-sm hover:bg-slate-50 transition-colors">
+            + Add New Scheme Policy
+          </button>
+
         </div>
       </div>
 
