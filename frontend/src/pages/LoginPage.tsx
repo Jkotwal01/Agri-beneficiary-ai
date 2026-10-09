@@ -24,15 +24,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-logo">🌾</div>
-        <h1 className="auth-title">Agri Beneficiary Intelligence</h1>
-        <p className="auth-subtitle">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm bg-surface border border-borderline rounded-sm p-6 shadow-sm">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-sm flex items-center justify-center text-xl mb-3">🌾</div>
+          <h1 className="text-base font-semibold text-primary tracking-tight text-center">Agri Beneficiary Intelligence</h1>
+          <p className="text-xs text-secondary mt-1">Sign in to your account</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="auth-form" id="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email address</label>
+        <form onSubmit={handleSubmit} id="login-form" className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-xs font-semibold text-secondary uppercase tracking-wider">Email address</label>
             <input
               id="email"
               type="email"
@@ -41,11 +43,12 @@ export default function LoginPage() {
               placeholder="you@example.com"
               required
               autoComplete="email"
+              className="w-full px-2.5 py-1.5 text-sm bg-slate-50 border border-borderline rounded-sm text-primary focus:outline-none focus:ring-1 focus:ring-accent-sky focus:border-accent-sky"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-xs font-semibold text-secondary uppercase tracking-wider">Password</label>
             <input
               id="password"
               type="password"
@@ -54,11 +57,12 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
               autoComplete="current-password"
+              className="w-full px-2.5 py-1.5 text-sm bg-slate-50 border border-borderline rounded-sm text-primary focus:outline-none focus:ring-1 focus:ring-accent-sky focus:border-accent-sky"
             />
           </div>
 
           {error && (
-            <div className="auth-error" role="alert" id="login-error">
+            <div className="px-2.5 py-1.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-sm font-medium" role="alert" id="login-error">
               {error}
             </div>
           )}
@@ -66,16 +70,16 @@ export default function LoginPage() {
           <button
             id="login-submit"
             type="submit"
-            className="auth-btn"
             disabled={loading}
+            className="w-full bg-primary hover:bg-slate-800 text-white font-semibold text-xs py-2 rounded-sm transition-colors disabled:opacity-50"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
-        <p className="auth-switch">
+        <p className="mt-5 text-center text-xs text-secondary">
           Don't have an account?{" "}
-          <a href="/register" onClick={(e) => { e.preventDefault(); navigate("/register"); }}>
+          <a href="/register" onClick={(e) => { e.preventDefault(); navigate("/register"); }} className="font-semibold text-accent-sky hover:underline">
             Register
           </a>
         </p>
