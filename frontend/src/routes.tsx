@@ -12,6 +12,7 @@ const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const ReviewQueuePage = React.lazy(() => import("./pages/ReviewQueuePage"));
 const FlagsPage = React.lazy(() => import("./pages/FlagsPage"));
 const OfficerApplicationsPage = React.lazy(() => import("./pages/OfficerApplicationsPage"));
+const EvaluationPage = React.lazy(() => import("./pages/EvaluationPage"));
 
 const FarmerLayout = React.lazy(() => import("./layouts/FarmerLayout"));
 const FarmerDashboardPage = React.lazy(() => import("./pages/FarmerDashboardPage"));
@@ -84,6 +85,7 @@ export function AppRoutes() {
           <Route path="review" element={<ReviewQueuePage />} />
           <Route path="flags" element={<FlagsPage />} />
           <Route path="applications" element={<OfficerApplicationsPage />} />
+          <Route path="evaluation" element={<EvaluationPage />} />
         </Route>
 
         {/* Default redirect */}
