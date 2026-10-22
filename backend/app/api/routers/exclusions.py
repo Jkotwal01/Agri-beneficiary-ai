@@ -1,4 +1,5 @@
 """Exclusions router — GET /exclusions?district=&scheme=."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends

@@ -1,4 +1,4 @@
-"""Farmers router — role-gated golden-record listing endpoint."""
+"""Farmers router — role-gated golden-record listing and detail endpoints."""
 
 from __future__ import annotations
 
@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, require_role
 from app.models.farmer import Farmer
 from app.models.user import User
-from app.schemas.farmer import FarmerSummaryOut
+from app.schemas.farmer import FarmerDetailOut, FarmerSummaryOut
+from app.services.farmer_service import FarmerService
 
 router = APIRouter(prefix="/farmers", tags=["farmers"])
 
@@ -37,3 +38,13 @@ def list_farmers(
         )
         for row in rows
     ]
+
+
+@router.get("/{farmer_id}", response_model=FarmerDetailOut)
+def get_farmer_detail(
+    farmer_id: int,
+    _current: User = Depends(require_role("admin", "officer")),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+):
+    """Return the full Farmer 360 payload — accessible to admin and officer only."""
+    return FarmerService(db).get_detail(farmer_id)

@@ -28,7 +28,9 @@ def list_flags(
         q = q.filter(Flag.status == status)
     rows = q.order_by(Flag.created_at.desc()).all()
     return [
-        FlagOut.model_validate(flag, from_attributes=True).model_copy(update={"farmer_name": farmer_name})
+        FlagOut.model_validate(flag, from_attributes=True).model_copy(
+            update={"farmer_name": farmer_name}
+        )
         for flag, farmer_name in rows
     ]
 
