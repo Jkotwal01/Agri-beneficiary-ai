@@ -3,28 +3,29 @@ ML Matcher — Spec Section 6, Module 3, Stage 3.
 
 XGBoostPairMatcher:   loads a trained XGBoost model and returns P(match) in [0,1].
 RuleShortcutMatcher:  deterministic shortcut rules applied BEFORE the ML model.
-                      - If mobile10 match + phonetic match → instant LINK (score=1.0)
-                      - If all 5 categorical features are 0 (all mismatch) → instant NO_MATCH (score=0.0)
+                      - Exact agristack_id match  → instant LINK (score=1.0)  [spec §6 Stage 3]
+                      - mobile10 match + phonetic match → instant LINK (score=1.0)
+                      - All 5 categorical features are 0 (all mismatch) → NO_MATCH (score=0.0)
 
-Thresholds (spec defaults):
-  score ≥ 0.80  → "auto_link"
-  0.50 ≤ score < 0.80 → "review"
-  score < 0.50  → "no_match"
+Thresholds sourced from settings (AUTO_LINK_THRESHOLD / REVIEW_THRESHOLD in .env):
+  score ≥ AUTO_LINK_THRESHOLD (default 0.90)  → "auto_link"
+  REVIEW_THRESHOLD ≤ score < AUTO_LINK_THRESHOLD (default 0.60) → "review"
+  score < REVIEW_THRESHOLD   → "no_match"
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Literal
 
 import joblib
 import numpy as np
 
+from app.core.config import settings
 from app.resolution.blocking import Record
 from app.resolution.features import build_feature_vector
 
-MODEL_PATH = Path(os.getenv("MATCHER_MODEL_PATH", "models/matcher.joblib"))
+MODEL_PATH = Path(settings.MATCHER_PATH)
 
 FEATURE_ORDER = [
     "name_jw",
@@ -39,8 +40,9 @@ FEATURE_ORDER = [
 
 Decision = Literal["auto_link", "review", "no_match"]
 
-THRESHOLD_LINK = 0.80
-THRESHOLD_REVIEW = 0.50
+# Thresholds read from settings so they can be tuned via .env without code changes
+THRESHOLD_LINK: float = settings.AUTO_LINK_THRESHOLD    # default 0.90
+THRESHOLD_REVIEW: float = settings.REVIEW_THRESHOLD     # default 0.60
 
 
 def _decision(score: float) -> Decision:
@@ -55,10 +57,22 @@ class RuleShortcutMatcher:
     """
     Fast deterministic shortcuts applied before the ML model.
     Returns (score, decision) or None if no shortcut applies.
+
+    Priority order (highest confidence first):
+      1. Exact agristack_id match  → 1.0 auto_link  [spec §6 Stage 3]
+      2. mobile10 AND phonetic match → 1.0 auto_link
+      3. All 5 categorical features mismatched → 0.0 no_match
     """
 
     @staticmethod
-    def evaluate(fv: dict) -> tuple[float, Decision] | None:
+    def evaluate(
+        fv: dict,
+        agristack_id_a: str | None = None,
+        agristack_id_b: str | None = None,
+    ) -> tuple[float, Decision] | None:
+        # Definite LINK: both records share the same non-null AgriStack ID (spec §6 Stage 3)
+        if agristack_id_a and agristack_id_b and agristack_id_a == agristack_id_b:
+            return 1.0, "auto_link"
         # Definite LINK: mobile match AND phonetic match
         if fv.get("same_mobile") == 1 and fv.get("phonetic_match") == 1:
             return 1.0, "auto_link"
@@ -94,8 +108,10 @@ class XGBoostPairMatcher:
         """Return P(match) in [0, 1]."""
         fv = build_feature_vector(a, b)
 
-        # Try rule shortcut first
-        shortcut = RuleShortcutMatcher.evaluate(fv)
+        # Try rule shortcut first (pass agristack_id from record metadata if available)
+        agristack_a = getattr(a, "agristack_id", None)
+        agristack_b = getattr(b, "agristack_id", None)
+        shortcut = RuleShortcutMatcher.evaluate(fv, agristack_a, agristack_b)
         if shortcut is not None:
             return shortcut[0]
 
@@ -110,7 +126,9 @@ class XGBoostPairMatcher:
     def score_with_decision(self, a: Record, b: Record) -> tuple[float, dict, Decision]:
         """Return (score, feature_vector, decision)."""
         fv = build_feature_vector(a, b)
-        shortcut = RuleShortcutMatcher.evaluate(fv)
+        agristack_a = getattr(a, "agristack_id", None)
+        agristack_b = getattr(b, "agristack_id", None)
+        shortcut = RuleShortcutMatcher.evaluate(fv, agristack_a, agristack_b)
         if shortcut is not None:
             return shortcut[0], fv, shortcut[1]
 

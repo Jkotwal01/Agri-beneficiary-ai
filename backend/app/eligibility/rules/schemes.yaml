@@ -1,0 +1,43 @@
+PM_KISAN:
+  domain: AGRICULTURE
+  active: true
+  rules:
+    - field: total_land_ha
+      operator: "<="
+      value: 2.0
+      error: "Exceeds marginal farmer threshold (max 2 ha)"
+    - field: total_land_ha
+      operator: ">"
+      value: 0
+      error: "Must own at least some land (> 0 ha)"
+
+PMFBY:
+  domain: AGRICULTURE
+  active: true
+  rules:
+    - field: crop
+      operator: "in"
+      value: ["wheat", "rice", "cotton", "maize", "soybean"]
+      error: "Crop not covered under PMFBY insurance"
+
+NFSM:
+  domain: AGRICULTURE
+  active: true
+  rules:
+    - field: total_land_ha
+      operator: "<="
+      value: 5.0
+      error: "NFSM is for small/marginal farmers (max 5 ha)"
+    - field: crop
+      operator: "in"
+      value: ["wheat", "rice", "pulses", "oilseeds", "maize"]
+      error: "Crop not eligible for NFSM support"
+
+KCC:
+  domain: AGRICULTURE
+  active: true
+  rules:
+    - field: total_land_ha
+      operator: ">"
+      value: 0
+      error: "Must own land to avail KCC"
