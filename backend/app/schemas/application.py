@@ -12,9 +12,18 @@ class PrefillRequest(BaseModel):
     scheme_code: str
 
 
+class FormFieldOut(BaseModel):
+    key: str
+    label: str
+    type: str
+    required: bool = False
+    autofill_from: str | None = None
+
+
 class PrefillResponse(BaseModel):
     values: dict[str, Any]
     autofilled_keys: list[str]
+    fields: list[FormFieldOut]
 
 
 class ApplicationSubmit(BaseModel):

@@ -23,3 +23,9 @@
     @apply bg-background text-primary antialiased font-sans text-[13px];
   }
 }
+
+@layer components {
+  .input {
+    @apply w-full border border-borderline rounded-sm text-sm px-2.5 py-1.5 bg-surface text-primary outline-none focus:border-accent-sky transition-colors;
+  }
+}

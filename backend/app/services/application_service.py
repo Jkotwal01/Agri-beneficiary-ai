@@ -34,7 +34,11 @@ class ApplicationService:
     def prefill(self, profile: FarmerProfile, scheme_code: str) -> dict:
         form_fields = load_form(scheme_code)
         values, autofilled_keys = autofill(form_fields, profile)
-        return {"values": values, "autofilled_keys": autofilled_keys}
+        return {
+            "values": values,
+            "autofilled_keys": autofilled_keys,
+            "fields": form_fields,
+        }
 
     def submit(
         self, profile: FarmerProfile, scheme_code: str, form_data: dict

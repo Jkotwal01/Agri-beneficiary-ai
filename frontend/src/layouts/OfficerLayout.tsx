@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { LayoutDashboard, GitMerge, Flag, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, GitMerge, Flag, FileCheck, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export default function OfficerLayout() {
   const { logout } = useAuthContext();
@@ -12,6 +12,7 @@ export default function OfficerLayout() {
     { name: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
     { name: "Review Queue", to: "/dashboard/review", icon: GitMerge },
     { name: "Rule Engine", to: "/dashboard/flags", icon: Flag },
+    { name: "Applications", to: "/dashboard/applications", icon: FileCheck },
   ];
 
   return (
