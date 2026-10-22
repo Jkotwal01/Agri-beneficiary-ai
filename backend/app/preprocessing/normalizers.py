@@ -181,7 +181,7 @@ def parse_dob(dob_str: str | None) -> date | None:
     # Try known formats
     for fmt in _DOB_FORMATS:
         try:
-            return datetime.strptime(s, fmt).date()  # noqa: DTZ007
+            return datetime.strptime(s, fmt).date()
         except ValueError:
             continue
     # Last resort: try to extract a 4-digit year

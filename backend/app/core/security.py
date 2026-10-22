@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import bcrypt
@@ -27,7 +27,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def create_token(data: dict[str, Any], expires_minutes: int | None = None) -> str:
     """Create a signed JWT with an exp claim."""
-    expire = datetime.now(timezone.utc) + timedelta(
+    expire = datetime.now(UTC) + timedelta(
         minutes=expires_minutes or settings.JWT_EXPIRE_MINUTES
     )
     payload = {**data, "exp": expire}
