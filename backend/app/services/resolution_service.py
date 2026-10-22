@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.models.clean_record import CleanRecord
 from app.models.farmer import Farmer
 from app.models.farmer_link import FarmerLink
+from app.models.land_parcel import LandParcel
 from app.models.match_candidate import MatchCandidate
 from app.models.source_record import SourceRecord
 from app.resolution.blocking import PhoneticVillageBlocker, Record
@@ -67,6 +68,8 @@ class ResolutionService:
             source_map[row.id] = src_lookup.get(row.source_record_id, "")
 
         record_map: dict[int, Record] = {r.id: r for r in records}
+        # Keep a mapping of clean_record id → CleanRecord ORM row (for land_parcels)
+        clean_row_map: dict[int, CleanRecord] = {row.id: row for row in clean_rows}
 
         # ------------------------------------------------------------------ #
         # Step 2: Blocking
@@ -124,7 +127,8 @@ class ResolutionService:
         # ------------------------------------------------------------------ #
         # Step 5: Build Farmer golden records
         # ------------------------------------------------------------------ #
-        # Wipe existing farmers + links for clean run
+        # Wipe existing farmers + links + parcels for clean run
+        db.query(LandParcel).delete()
         db.query(FarmerLink).delete()
         db.query(Farmer).delete()
         db.flush()
@@ -185,6 +189,22 @@ class ResolutionService:
                     score=confidence if len(cluster) > 1 else None,
                 )
                 db.add(link)
+
+                # Write land_parcel if this clean_record has survey + village + area data
+                clean_row = clean_row_map.get(rid)
+                if (
+                    clean_row
+                    and clean_row.village_code
+                    and clean_row.survey_no
+                    and clean_row.land_ha is not None
+                ):
+                    parcel = LandParcel(
+                        farmer_id=farmer.id,
+                        village_code=clean_row.village_code,
+                        survey_no=clean_row.survey_no,
+                        area_ha=clean_row.land_ha,
+                    )
+                    db.add(parcel)
 
             farmers_created += 1
 

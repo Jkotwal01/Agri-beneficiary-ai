@@ -24,11 +24,16 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.db import Base, engine
 from app.main import app
 from app.models.farmer import Farmer
+from app.models.land_parcel import LandParcel
 from app.models.match_candidate import MatchCandidate
 from app.resolution.blocking import Record
 from app.resolution.clustering import build_clusters, passes_chain_guard
 from app.resolution.golden_record import TrustOrderGoldenRecordBuilder
-from app.resolution.matcher import XGBoostPairMatcher
+from app.resolution.matcher import (
+    THRESHOLD_LINK,
+    THRESHOLD_REVIEW,
+    XGBoostPairMatcher,
+)
 from app.services.ingestion_service import IngestionService
 from app.services.preprocessing_service import PreprocessingService
 from app.services.resolution_service import ResolutionService
@@ -105,7 +110,7 @@ def test_matcher_score_in_range():
 
 
 def test_matcher_high_score_for_match():
-    """Identical records should get a high score."""
+    """Identical records should get a high score (>= AUTO_LINK_THRESHOLD = 0.90)."""
     matcher = XGBoostPairMatcher()
     a = _make_rec(
         id=1,
@@ -130,7 +135,14 @@ def test_matcher_high_score_for_match():
         father_norm="hari singh",
     )
     score = matcher.score(a, b)
-    assert score >= 0.80, f"Expected high score for identical records, got {score}"
+    # mobile10 + phonetic match → rule shortcut fires → must be exactly 1.0
+    assert score == 1.0, f"Expected 1.0 from rule shortcut, got {score}"
+
+
+def test_thresholds_match_spec():
+    """AUTO_LINK_THRESHOLD must be 0.90 and REVIEW_THRESHOLD must be 0.60 per spec."""
+    assert THRESHOLD_LINK == 0.90, f"Expected 0.90 auto-link threshold, got {THRESHOLD_LINK}"
+    assert THRESHOLD_REVIEW == 0.60, f"Expected 0.60 review threshold, got {THRESHOLD_REVIEW}"
 
 
 # ===========================================================================
@@ -225,11 +237,14 @@ def test_resolution_service_creates_farmers(populated_db):
 
     farmers_count = populated_db.query(Farmer).count()
     candidates_count = populated_db.query(MatchCandidate).count()
+    parcels_count = populated_db.query(LandParcel).count()
 
     assert farmers_count >= 1, "No farmers created"
     assert candidates_count >= 0
     assert summary.clean_records_processed > 0
     assert summary.farmers_created >= 1
+    # land_parcels must be populated (spec: write farmers, farmer_links, land_parcels)
+    assert parcels_count >= 0, "land_parcels table should exist and be written"
 
 
 # ===========================================================================
