@@ -24,7 +24,6 @@ app.include_router(flags_router)
 app.include_router(recommendations_router)
 
 
-
 @app.get("/health")
 def health_check():
     return {"status": "ok"}

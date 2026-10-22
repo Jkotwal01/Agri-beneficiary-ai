@@ -141,8 +141,12 @@ def test_matcher_high_score_for_match():
 
 def test_thresholds_match_spec():
     """AUTO_LINK_THRESHOLD must be 0.90 and REVIEW_THRESHOLD must be 0.60 per spec."""
-    assert THRESHOLD_LINK == 0.90, f"Expected 0.90 auto-link threshold, got {THRESHOLD_LINK}"
-    assert THRESHOLD_REVIEW == 0.60, f"Expected 0.60 review threshold, got {THRESHOLD_REVIEW}"
+    assert (
+        THRESHOLD_LINK == 0.90
+    ), f"Expected 0.90 auto-link threshold, got {THRESHOLD_LINK}"
+    assert (
+        THRESHOLD_REVIEW == 0.60
+    ), f"Expected 0.60 review threshold, got {THRESHOLD_REVIEW}"
 
 
 # ===========================================================================

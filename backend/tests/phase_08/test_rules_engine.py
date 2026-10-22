@@ -12,6 +12,7 @@ Tests:
   8. PATCH /flags/{id} with {"status": "confirmed"} updates DB + audit_log.
   9. POST /pipeline/evaluate → 202.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -135,7 +136,9 @@ def db_with_flags():
 
     user = db.query(User).filter(User.email == "test_officer@example.com").first()
     if not user:
-        user = User(email="test_officer@example.com", password_hash="dummy", role="officer")
+        user = User(
+            email="test_officer@example.com", password_hash="dummy", role="officer"
+        )
         db.add(user)
         db.flush()
 
@@ -144,10 +147,20 @@ def db_with_flags():
     db.add(farmer)
     db.flush()
 
-    flag1 = Flag(farmer_id=farmer.id, type="SameSchemeTwice",
-                 severity="High", reason="duplicate", status="open")
-    flag2 = Flag(farmer_id=farmer.id, type="ParcelOverclaim",
-                 severity="Medium", reason="overclaim", status="open")
+    flag1 = Flag(
+        farmer_id=farmer.id,
+        type="SameSchemeTwice",
+        severity="High",
+        reason="duplicate",
+        status="open",
+    )
+    flag2 = Flag(
+        farmer_id=farmer.id,
+        type="ParcelOverclaim",
+        severity="Medium",
+        reason="overclaim",
+        status="open",
+    )
     db.add_all([flag1, flag2])
     db.commit()
 
@@ -183,10 +196,14 @@ def test_patch_flag_status(db_with_flags):
 
     # Verify audit_log written
     db.expire_all()
-    log = db.query(AuditLog).filter(
-        AuditLog.entity == "flags",
-        AuditLog.entity_id == flag_id,
-    ).first()
+    log = (
+        db.query(AuditLog)
+        .filter(
+            AuditLog.entity == "flags",
+            AuditLog.entity_id == flag_id,
+        )
+        .first()
+    )
     assert log is not None
     assert "confirmed" in log.action
 
