@@ -10,6 +10,7 @@ from pydantic import BaseModel
 class FlagOut(BaseModel):
     id: int
     farmer_id: int
+    farmer_name: str | None = None
     type: str
     severity: str
     reason: str

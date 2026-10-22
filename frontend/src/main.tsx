@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV || import.meta.env.VITE_USE_MOCKS !== 'true') {
     return
   }
   const { worker } = await import('./mocks/browser')
