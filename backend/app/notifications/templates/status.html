@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+<body style="font-family: sans-serif; color: #0F172A;">
+  <h2>Application {{ status }}</h2>
+  <p>Hi {{ farmer_name }}, your application for <strong>{{ scheme_name }}</strong> was {{ status }}.</p>
+  {% if note %}
+  <p>Officer note: {{ note }}</p>
+  {% endif %}
+  <p>
+    <a href="{{ app_base_url }}/me/applications">View your applications</a>
+  </p>
+</body>
+</html>
