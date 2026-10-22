@@ -1,24 +1,8 @@
-import { useEffect, useState } from "react";
 import { Settings, Save, AlertCircle } from "lucide-react";
-
-type FlagItem = {
-  id: number;
-  farmer_id: number;
-  farmer_name: string;
-  type: string;
-  severity: string;
-  status: string;
-  details: string;
-};
+import { useFlags } from "../hooks/useFlags";
 
 export default function FlagsPage() {
-  const [flags, setFlags] = useState<FlagItem[]>([]);
-
-  useEffect(() => {
-    fetch("/api/flags")
-      .then((res) => res.json())
-      .then((data) => setFlags(data.items));
-  }, []);
+  const { flags, loading, error } = useFlags();
 
   return (
     <div className="h-full flex gap-4">
@@ -114,34 +98,39 @@ export default function FlagsPage() {
           <span className="text-xs text-secondary font-mono">Live Monitoring</span>
         </div>
         <div className="flex-1 overflow-auto p-4 space-y-3">
-          {flags.map((flag) => (
-            <div key={flag.id} className="border border-borderline rounded-sm overflow-hidden">
-              <div className="bg-slate-50 px-3 py-1.5 border-b border-borderline flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className={`w-4 h-4 ${flag.severity === 'HIGH' ? 'text-red-600' : 'text-accent-amber'}`} />
-                  <span className="text-xs font-mono font-bold text-primary">{flag.type}</span>
+          {loading && <p className="text-sm text-secondary">Loading flags…</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          {flags.map((flag) => {
+            const isHigh = flag.severity.toUpperCase() === "HIGH";
+            return (
+              <div key={flag.id} className="border border-borderline rounded-sm overflow-hidden">
+                <div className="bg-slate-50 px-3 py-1.5 border-b border-borderline flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <AlertCircle className={`w-4 h-4 ${isHigh ? 'text-red-600' : 'text-accent-amber'}`} />
+                    <span className="text-xs font-mono font-bold text-primary">{flag.type}</span>
+                  </div>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase ${
+                    isHigh ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-amber-100 text-amber-700 border border-amber-200'
+                  }`}>
+                    {flag.severity}
+                  </span>
                 </div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase ${
-                  flag.severity === 'HIGH' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-amber-100 text-amber-700 border border-amber-200'
-                }`}>
-                  {flag.severity}
-                </span>
+                <div className="p-3 bg-surface">
+                  <div className="text-xs text-secondary mb-2 flex justify-between">
+                    <span>Target: <strong className="text-primary">{flag.farmer_name ?? "Unknown"}</strong></span>
+                    <span className="font-mono">ID: {flag.farmer_id}</span>
+                  </div>
+                  <p className="text-sm text-primary leading-snug">
+                    {flag.reason}
+                  </p>
+                  <div className="mt-3 flex justify-end space-x-2">
+                     <button className="px-2 py-1 border border-borderline text-xs font-semibold text-secondary hover:bg-slate-50 rounded-sm transition-colors">Dismiss</button>
+                     <button className="px-2 py-1 bg-primary text-white text-xs font-semibold hover:bg-slate-800 rounded-sm transition-colors">Investigate</button>
+                  </div>
+                </div>
               </div>
-              <div className="p-3 bg-surface">
-                <div className="text-xs text-secondary mb-2 flex justify-between">
-                  <span>Target: <strong className="text-primary">{flag.farmer_name}</strong></span>
-                  <span className="font-mono">ID: {flag.farmer_id}</span>
-                </div>
-                <p className="text-sm text-primary leading-snug">
-                  {flag.details}
-                </p>
-                <div className="mt-3 flex justify-end space-x-2">
-                   <button className="px-2 py-1 border border-borderline text-xs font-semibold text-secondary hover:bg-slate-50 rounded-sm transition-colors">Dismiss</button>
-                   <button className="px-2 py-1 bg-primary text-white text-xs font-semibold hover:bg-slate-800 rounded-sm transition-colors">Investigate</button>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

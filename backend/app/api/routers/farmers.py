@@ -1,4 +1,4 @@
-"""Farmers router — role-gated farmer listing endpoint."""
+"""Farmers router — role-gated golden-record listing endpoint."""
 
 from __future__ import annotations
 
@@ -6,16 +6,34 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, require_role
+from app.models.farmer import Farmer
 from app.models.user import User
+from app.schemas.farmer import FarmerSummaryOut
 
 router = APIRouter(prefix="/farmers", tags=["farmers"])
 
 
-@router.get("", status_code=200)
+@router.get("", response_model=list[FarmerSummaryOut])
 def list_farmers(
+    q: str | None = None,
+    district: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
     _current: User = Depends(require_role("admin", "officer")),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
-) -> list[dict]:
-    """Return farmers list — accessible to admin and officer only."""
-    farmers = db.query(User).filter(User.role == "farmer").all()
-    return [{"id": u.id, "email": u.email, "role": u.role} for u in farmers]
+) -> list[FarmerSummaryOut]:
+    """Return golden-record farmers, accessible to admin and officer only."""
+    query = db.query(Farmer)
+    if q:
+        query = query.filter(Farmer.name.ilike(f"%{q}%"))
+    if district:
+        query = query.filter(Farmer.district_code == district)
+
+    rows = query.order_by(Farmer.id).offset(offset).limit(limit).all()
+    return [
+        FarmerSummaryOut(
+            **{c.name: getattr(row, c.name) for c in Farmer.__table__.columns},
+            status="Golden" if (row.confidence or 0) >= 0.9 else "Review",
+        )
+        for row in rows
+    ]

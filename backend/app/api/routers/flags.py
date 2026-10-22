@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.models.audit_log import AuditLog
+from app.models.farmer import Farmer
 from app.models.flag import Flag
 from app.models.user import User
 from app.schemas.flags import FlagOut, FlagPatch
@@ -19,12 +20,16 @@ def list_flags(
     status: str | None = None,
     db: Session = Depends(get_db),  # noqa: B008
 ):
-    q = db.query(Flag)
+    q = db.query(Flag, Farmer.name).outerjoin(Farmer, Farmer.id == Flag.farmer_id)
     if type:
         q = q.filter(Flag.type == type)
     if status:
         q = q.filter(Flag.status == status)
-    return q.order_by(Flag.created_at.desc()).all()
+    rows = q.order_by(Flag.created_at.desc()).all()
+    return [
+        FlagOut.model_validate(flag, from_attributes=True).model_copy(update={"farmer_name": farmer_name})
+        for flag, farmer_name in rows
+    ]
 
 
 @router.patch("/{flag_id}", response_model=FlagOut)
