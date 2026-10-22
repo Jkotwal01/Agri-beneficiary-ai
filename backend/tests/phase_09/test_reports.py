@@ -8,6 +8,7 @@ Tests:
   4. GET /exclusions?district=&scheme= filters correctly.
   5. GET /recommendations?farmer_id=<id> returns eligible and not-enrolled schemes.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -56,23 +57,46 @@ def seeded_db():
     db.add(scheme)
     db.flush()
 
-    farmer_a = Farmer(name="Ramesh Kotwal", district_code="PUNE", village_code="V1", confidence=0.95)
-    farmer_b = Farmer(name="Suresh Patil", district_code="NASHIK", village_code="V2", confidence=0.9)
+    farmer_a = Farmer(
+        name="Ramesh Kotwal", district_code="PUNE", village_code="V1", confidence=0.95
+    )
+    farmer_b = Farmer(
+        name="Suresh Patil", district_code="NASHIK", village_code="V2", confidence=0.9
+    )
     db.add_all([farmer_a, farmer_b])
     db.flush()
 
     db.add(SourceRecord(source_name="pmkisan", source_row_id="1", raw_json={"a": 1}))
-    db.add(Flag(farmer_id=farmer_a.id, type="SameSchemeTwice", severity="High",
-                reason="dup", status="open"))
+    db.add(
+        Flag(
+            farmer_id=farmer_a.id,
+            type="SameSchemeTwice",
+            severity="High",
+            reason="dup",
+            status="open",
+        )
+    )
 
-    db.add(Recommendation(
-        farmer_id=farmer_a.id, scheme_id=scheme.id,
-        eligible=True, already_enrolled=False, reasons_json=[], priority=1,
-    ))
-    db.add(Recommendation(
-        farmer_id=farmer_b.id, scheme_id=scheme.id,
-        eligible=False, already_enrolled=False, reasons_json=["0 land"], priority=0,
-    ))
+    db.add(
+        Recommendation(
+            farmer_id=farmer_a.id,
+            scheme_id=scheme.id,
+            eligible=True,
+            already_enrolled=False,
+            reasons_json=[],
+            priority=1,
+        )
+    )
+    db.add(
+        Recommendation(
+            farmer_id=farmer_b.id,
+            scheme_id=scheme.id,
+            eligible=False,
+            already_enrolled=False,
+            reasons_json=["0 land"],
+            priority=0,
+        )
+    )
     db.commit()
 
     token = _officer_token(db)

@@ -1,4 +1,5 @@
 """Reports router — GET /reports/summary, /reports/coverage, /reports/export."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Response
