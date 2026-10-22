@@ -53,10 +53,14 @@ def submit(
 @router.get("", response_model=list[ApplicationOut])
 def list_applications(
     status_filter: str | None = None,
-    current: User = Depends(require_role("admin", "officer")),  # noqa: B008
+    current: User = Depends(require_role("admin", "officer", "farmer")),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ):
+    """Officers/admins see every application; a farmer sees only their own."""
     q = db.query(SchemeApplication)
+    if current.role == "farmer":
+        profile = _own_profile(db, current.id)
+        q = q.filter(SchemeApplication.farmer_profile_id == profile.id)
     if status_filter:
         q = q.filter(SchemeApplication.status == status_filter)
     return q.order_by(SchemeApplication.id).all()

@@ -23,6 +23,14 @@ def _get_or_create_profile(db: Session, user_id: int) -> FarmerProfile:
     return profile
 
 
+@router.get("/profile", response_model=ProfileOut)
+def get_profile(
+    current: User = Depends(require_role("farmer")),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+):
+    return _get_or_create_profile(db, current.id)
+
+
 @router.put("/profile", response_model=ProfileOut)
 def put_profile(
     payload: ProfileIn,

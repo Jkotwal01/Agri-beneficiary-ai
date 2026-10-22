@@ -11,11 +11,15 @@ const OfficerLayout = React.lazy(() => import("./layouts/OfficerLayout"));
 const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const ReviewQueuePage = React.lazy(() => import("./pages/ReviewQueuePage"));
 const FlagsPage = React.lazy(() => import("./pages/FlagsPage"));
+const OfficerApplicationsPage = React.lazy(() => import("./pages/OfficerApplicationsPage"));
 
-// Placeholder pages — replaced by their actual implementation in later phases
-function FarmerProfile() {
-  return <div style={{ padding: 32 }}><h1>My Farmer Profile</h1></div>;
-}
+const FarmerLayout = React.lazy(() => import("./layouts/FarmerLayout"));
+const FarmerDashboardPage = React.lazy(() => import("./pages/FarmerDashboardPage"));
+const ProfileWizardPage = React.lazy(() => import("./pages/ProfileWizardPage"));
+const SchemeDetailPage = React.lazy(() => import("./pages/SchemeDetailPage"));
+const ApplyPage = React.lazy(() => import("./pages/ApplyPage"));
+const MyApplicationsPage = React.lazy(() => import("./pages/MyApplicationsPage"));
+const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
 
 /** Guard: redirect to /login if unauthenticated or wrong role */
 function ProtectedRoute({
@@ -55,10 +59,17 @@ export function AppRoutes() {
           path="/me"
           element={
             <ProtectedRoute roles={["farmer"]}>
-              <FarmerProfile />
+              <FarmerLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<FarmerDashboardPage />} />
+          <Route path="profile" element={<ProfileWizardPage />} />
+          <Route path="schemes/:code" element={<SchemeDetailPage />} />
+          <Route path="schemes/:code/apply" element={<ApplyPage />} />
+          <Route path="applications" element={<MyApplicationsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
 
         {/* Officer + Admin */}
         <Route
@@ -72,6 +83,7 @@ export function AppRoutes() {
           <Route index element={<DashboardPage />} />
           <Route path="review" element={<ReviewQueuePage />} />
           <Route path="flags" element={<FlagsPage />} />
+          <Route path="applications" element={<OfficerApplicationsPage />} />
         </Route>
 
         {/* Default redirect */}
