@@ -15,13 +15,16 @@ from app.models.enrollment import Enrollment
 from app.models.farmer_profile import FarmerProfile
 from app.models.scheme import Scheme
 from app.models.scheme_application import SchemeApplication
+from app.notifications.sender import EmailSender, get_email_sender
+from app.services.notification_service import NotificationService
 
 _ACTIVE_APPLICATION_STATUSES = ["submitted", "approved"]
 
 
 class ApplicationService:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, sender: EmailSender | None = None) -> None:
         self._db = db
+        self._sender = sender or get_email_sender()
 
     def _get_scheme(self, scheme_code: str) -> Scheme:
         scheme = self._db.query(Scheme).filter(Scheme.code == scheme_code).first()
@@ -116,4 +119,6 @@ class ApplicationService:
         )
         self._db.commit()
         self._db.refresh(application)
+
+        NotificationService(self._db, self._sender).send_status_email(application)
         return application

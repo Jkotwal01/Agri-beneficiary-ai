@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<body style="font-family: sans-serif; color: #0F172A;">
+  <h2>Hi {{ farmer_name }},</h2>
+  <p>Here are the schemes you may be eligible for this week:</p>
+  <ul>
+    {% for scheme in schemes %}
+    <li><strong>{{ scheme.scheme_name }}</strong> ({{ scheme.scheme_code }})</li>
+    {% endfor %}
+  </ul>
+  <p>
+    <a href="{{ app_base_url }}/me">View and apply</a>
+  </p>
+</body>
+</html>
