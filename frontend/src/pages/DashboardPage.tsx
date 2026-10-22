@@ -1,48 +1,22 @@
-import { useEffect, useState } from "react";
 import { CheckCircle2, AlertTriangle, Users, FileText, type LucideIcon } from "lucide-react";
-
-type Summary = {
-  total_ingested: number;
-  golden_records: number;
-  active_flags: number;
-  pending_reviews: number;
-};
-
-type Farmer = {
-  id: number;
-  name: string;
-  district_code: string;
-  village_code: string;
-  mobile: string;
-  agristack_id: string | null;
-  pmkisan_id: string | null;
-  pmfby_id: string | null;
-  kcc_id: string | null;
-  status: string;
-};
+import { useSummary } from "../hooks/useReports";
+import { useFarmers } from "../hooks/useFarmers";
 
 export default function DashboardPage() {
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [farmers, setFarmers] = useState<Farmer[]>([]);
-
-  useEffect(() => {
-    fetch("/api/reports/summary")
-      .then((res) => res.json())
-      .then(setSummary);
-    
-    fetch("/api/farmers")
-      .then((res) => res.json())
-      .then((data) => setFarmers(data.items));
-  }, []);
+  const { summary, loading: summaryLoading, error: summaryError } = useSummary();
+  const { farmers, loading: farmersLoading, error: farmersError } = useFarmers();
 
   return (
     <div className="flex flex-col h-full space-y-4">
+      {summaryError && <ErrorBanner message={summaryError} />}
+      {farmersError && <ErrorBanner message={farmersError} />}
+
       {/* Top Counters Row */}
       <div className="grid grid-cols-4 gap-4 shrink-0">
-        <StatCard title="Total Ingested" value={summary?.total_ingested} icon={FileText} />
-        <StatCard title="Golden Records" value={summary?.golden_records} icon={CheckCircle2} color="text-accent-emerald" />
-        <StatCard title="Active Flags" value={summary?.active_flags} icon={AlertTriangle} color="text-accent-amber" />
-        <StatCard title="Pending Reviews" value={summary?.pending_reviews} icon={Users} color="text-accent-sky" />
+        <StatCard title="Total Records" value={summary?.total_records} icon={FileText} loading={summaryLoading} />
+        <StatCard title="Unique Farmers" value={summary?.unique_farmers} icon={CheckCircle2} color="text-accent-emerald" loading={summaryLoading} />
+        <StatCard title="Open Flags" value={summary?.open_flags} icon={AlertTriangle} color="text-accent-amber" loading={summaryLoading} />
+        <StatCard title="Exclusions" value={summary?.exclusions} icon={Users} color="text-accent-sky" loading={summaryLoading} />
       </div>
 
       {/* Dense Datagrid */}
@@ -52,52 +26,58 @@ export default function DashboardPage() {
           <span className="text-xs text-secondary font-mono">Showing {farmers.length} records</span>
         </div>
         <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 bg-slate-50 border-b border-borderline z-10">
-              <tr>
-                <Th>ID</Th>
-                <Th>Name</Th>
-                <Th>Mobile</Th>
-                <Th>District / Village</Th>
-                <Th>AgriStack</Th>
-                <Th>PM-KISAN</Th>
-                <Th>PMFBY</Th>
-                <Th>KCC</Th>
-                <Th>Status</Th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-borderline">
-              {farmers.map((f) => (
-                <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">{f.id}</td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-medium text-primary">{f.name}</td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">{f.mobile}</td>
-                  <td className="px-3 py-1.5 whitespace-nowrap text-xs text-secondary">
-                    {f.district_code} <span className="text-slate-400">/</span> {f.village_code}
-                  </td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs"><TrackId val={f.agristack_id} /></td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs"><TrackId val={f.pmkisan_id} /></td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs"><TrackId val={f.pmfby_id} /></td>
-                  <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs"><TrackId val={f.kcc_id} /></td>
-                  <td className="px-3 py-1.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${
-                      f.status === 'Golden' ? 'bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20' : 
-                      'bg-accent-amber/10 text-accent-amber border border-accent-amber/20'
-                    }`}>
-                      {f.status}
-                    </span>
-                  </td>
+          {farmersLoading ? (
+            <div className="p-4 text-sm text-secondary">Loading farmers…</div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead className="sticky top-0 bg-slate-50 border-b border-borderline z-10">
+                <tr>
+                  <Th>ID</Th>
+                  <Th>Name</Th>
+                  <Th>Mobile</Th>
+                  <Th>District / Village</Th>
+                  <Th>Land (Ha)</Th>
+                  <Th>Category</Th>
+                  <Th>Confidence</Th>
+                  <Th>Status</Th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="text-sm divide-y divide-borderline">
+                {farmers.map((f) => (
+                  <tr key={f.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">{f.id}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap font-medium text-primary">{f.name}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">{f.mobile ?? "-"}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap text-xs text-secondary">
+                      {f.district_code ?? "-"} <span className="text-slate-400">/</span> {f.village_code ?? "-"}
+                    </td>
+                    <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">
+                      {f.total_land_ha ?? "-"}
+                    </td>
+                    <td className="px-3 py-1.5 whitespace-nowrap text-xs text-secondary">{f.category ?? "-"}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-secondary">
+                      {f.confidence !== null ? f.confidence.toFixed(2) : "-"}
+                    </td>
+                    <td className="px-3 py-1.5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${
+                        f.status === 'Golden' ? 'bg-accent-emerald/10 text-accent-emerald border border-accent-emerald/20' :
+                        'bg-accent-amber/10 text-accent-amber border border-accent-amber/20'
+                      }`}>
+                        {f.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon: Icon, color = "text-secondary" }: { title: string; value?: number; icon: LucideIcon; color?: string }) {
+function StatCard({ title, value, icon: Icon, color = "text-secondary", loading }: { title: string; value?: number; icon: LucideIcon; color?: string; loading?: boolean }) {
   return (
     <div className="bg-surface border border-borderline rounded-sm p-3 flex items-center space-x-3">
       <div className={`p-2 rounded-sm bg-slate-50 border border-borderline ${color}`}>
@@ -105,7 +85,9 @@ function StatCard({ title, value, icon: Icon, color = "text-secondary" }: { titl
       </div>
       <div>
         <p className="text-xs font-medium text-secondary uppercase tracking-wider">{title}</p>
-        <p className="text-xl font-bold text-primary mt-0.5">{value === undefined ? "—" : value.toLocaleString()}</p>
+        <p className="text-xl font-bold text-primary mt-0.5">
+          {loading || value === undefined ? "—" : value.toLocaleString()}
+        </p>
       </div>
     </div>
   );
@@ -119,7 +101,10 @@ function Th({ children }: { children: React.ReactNode }) {
   );
 }
 
-function TrackId({ val }: { val: string | null }) {
-  if (!val) return <span className="text-slate-300">-</span>;
-  return <span className="text-primary bg-slate-100 px-1 py-0.5 rounded-sm border border-slate-200">{val}</span>;
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div className="shrink-0 bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-sm">
+      {message}
+    </div>
+  );
 }
