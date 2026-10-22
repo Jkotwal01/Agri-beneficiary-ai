@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertTriangle, Users, FileText } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Users, FileText, type LucideIcon } from "lucide-react";
 
 type Summary = {
   total_ingested: number;
@@ -97,7 +97,7 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color = "text-secondary" }: { title: string; value?: number; icon: any; color?: string }) {
+function StatCard({ title, value, icon: Icon, color = "text-secondary" }: { title: string; value?: number; icon: LucideIcon; color?: string }) {
   return (
     <div className="bg-surface border border-borderline rounded-sm p-3 flex items-center space-x-3">
       <div className={`p-2 rounded-sm bg-slate-50 border border-borderline ${color}`}>
