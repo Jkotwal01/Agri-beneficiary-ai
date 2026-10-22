@@ -1,24 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, X, Activity, GitMerge } from "lucide-react";
-
-type MatchItem = {
-  id: number;
-  score: number;
-  record_a: Record<string, string | null>;
-  record_b: Record<string, string | null>;
-  features: Record<string, number>;
-  shap: { feature: string; value: string; shap_value: number }[];
-};
+import { useMatches } from "../hooks/useMatches";
+import type { CleanRecord } from "../types/match";
 
 export default function ReviewQueuePage() {
-  const [matches, setMatches] = useState<MatchItem[]>([]);
+  const { matches, loading, error, decide } = useMatches();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    fetch("/api/matches?decision=review")
-      .then((res) => res.json())
-      .then((data) => setMatches(data.items));
-  }, []);
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center text-secondary text-sm">
+        Loading review queue…
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center text-red-600 text-sm">
+        {error}
+      </div>
+    );
+  }
 
   if (matches.length === 0) {
     return (
@@ -28,15 +31,11 @@ export default function ReviewQueuePage() {
     );
   }
 
-  const match = matches[currentIndex];
+  const match = matches[Math.min(currentIndex, matches.length - 1)];
 
-  const handleDecision = () => {
-    // Mock API call to save decision
-    if (currentIndex < matches.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setMatches([]);
-    }
+  const handleDecision = async (decision: "confirm" | "reject") => {
+    await decide(match.id, decision);
+    setCurrentIndex((prev) => Math.max(0, Math.min(prev, matches.length - 2)));
   };
 
   return (
@@ -65,7 +64,7 @@ export default function ReviewQueuePage() {
           <div className="bg-slate-50 px-3 py-2 border-b border-borderline text-xs font-semibold text-secondary uppercase tracking-wider flex justify-between">
             <span>Record A</span>
             <span className="text-accent-sky font-mono bg-accent-sky/10 px-1.5 rounded-sm border border-accent-sky/20">
-              {match.record_a.source}
+              {match.record_a?.source_name}
             </span>
           </div>
           <div className="p-4 flex-1 overflow-auto">
@@ -93,15 +92,15 @@ export default function ReviewQueuePage() {
             </div>
             
             <div className="w-full mt-4 flex gap-2">
-              <button 
-                onClick={() => handleDecision()}
+              <button
+                onClick={() => handleDecision("reject")}
                 className="flex-1 flex items-center justify-center px-3 py-1.5 border border-red-200 bg-red-50 text-red-700 text-xs font-semibold rounded-sm hover:bg-red-100 transition-colors"
               >
                 <X className="w-3.5 h-3.5 mr-1" />
                 Reject
               </button>
-              <button 
-                onClick={() => handleDecision()}
+              <button
+                onClick={() => handleDecision("confirm")}
                 className="flex-1 flex items-center justify-center px-3 py-1.5 bg-accent-emerald text-white text-xs font-semibold rounded-sm hover:bg-emerald-700 transition-colors shadow-sm"
               >
                 <Check className="w-3.5 h-3.5 mr-1" />
@@ -145,7 +144,7 @@ export default function ReviewQueuePage() {
           <div className="bg-slate-50 px-3 py-2 border-b border-borderline text-xs font-semibold text-secondary uppercase tracking-wider flex justify-between">
             <span>Record B</span>
             <span className="text-accent-sky font-mono bg-accent-sky/10 px-1.5 rounded-sm border border-accent-sky/20">
-              {match.record_b.source}
+              {match.record_b?.source_name}
             </span>
           </div>
           <div className="p-4 flex-1 overflow-auto">
@@ -158,8 +157,8 @@ export default function ReviewQueuePage() {
   );
 }
 
-function RecordDetails({ record }: { record: Record<string, string | null> }) {
-  const fields = [
+function RecordDetails({ record }: { record: CleanRecord | null }) {
+  const fields: { label: string; key: keyof CleanRecord }[] = [
     { label: "Normalized Name", key: "name_norm" },
     { label: "Mobile (10 digit)", key: "mobile10" },
     { label: "District Code", key: "district_code" },
@@ -175,7 +174,7 @@ function RecordDetails({ record }: { record: Record<string, string | null> }) {
             {f.label}
           </div>
           <div className="text-sm font-mono text-primary bg-slate-50 border border-slate-200 px-2 py-1.5 rounded-sm">
-            {record[f.key] || <span className="text-slate-400 italic">null</span>}
+            {(record?.[f.key] as string | null) || <span className="text-slate-400 italic">null</span>}
           </div>
         </div>
       ))}
