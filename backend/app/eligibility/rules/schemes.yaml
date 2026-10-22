@@ -1,6 +1,8 @@
 PM_KISAN:
   domain: AGRICULTURE
   active: true
+  status: active
+  end_date: null
   rules:
     - field: total_land_ha
       operator: "<="
@@ -10,19 +12,81 @@ PM_KISAN:
       operator: ">"
       value: 0
       error: "Must own at least some land (> 0 ha)"
+  application_form:
+    - key: full_name
+      label: Full Name
+      type: text
+      required: true
+      autofill_from: full_name
+    - key: mobile
+      label: Mobile Number
+      type: text
+      required: true
+      autofill_from: mobile
+    - key: total_land_ha
+      label: Total Land (Ha)
+      type: number
+      required: true
+      autofill_from: total_land_ha
+    - key: bank_name
+      label: Bank Name
+      type: text
+      required: true
+      autofill_from: bank_name
+    - key: declaration
+      label: Self Declaration Accepted
+      type: checkbox
+      required: true
+    - key: witness_name
+      label: Witness Name
+      type: text
+      required: false
 
 PMFBY:
   domain: AGRICULTURE
   active: true
+  status: active
+  end_date: null
   rules:
     - field: crop
       operator: "in"
       value: ["wheat", "rice", "cotton", "maize", "soybean"]
       error: "Crop not covered under PMFBY insurance"
+  application_form:
+    - key: full_name
+      label: Full Name
+      type: text
+      required: true
+      autofill_from: full_name
+    - key: mobile
+      label: Mobile Number
+      type: text
+      required: true
+      autofill_from: mobile
+    - key: village
+      label: Village
+      type: text
+      required: true
+      autofill_from: village
+    - key: main_crops
+      label: Main Crops
+      type: text
+      required: true
+      autofill_from: main_crops
+    - key: sowing_date
+      label: Sowing Date
+      type: date
+      required: false
+    - key: insurance_amount
+      label: Requested Sum Insured
+      type: number
+      required: false
 
 NFSM:
   domain: AGRICULTURE
   active: true
+  status: active
+  end_date: null
   rules:
     - field: total_land_ha
       operator: "<="
@@ -32,12 +96,55 @@ NFSM:
       operator: "in"
       value: ["wheat", "rice", "pulses", "oilseeds", "maize"]
       error: "Crop not eligible for NFSM support"
+  application_form:
+    - key: full_name
+      label: Full Name
+      type: text
+      required: true
+      autofill_from: full_name
+    - key: total_land_ha
+      label: Total Land (Ha)
+      type: number
+      required: true
+      autofill_from: total_land_ha
+    - key: main_crops
+      label: Main Crops
+      type: text
+      required: true
+      autofill_from: main_crops
 
 KCC:
-  domain: AGRICULTURE
+  domain: CREDIT
   active: true
+  status: active
+  end_date: null
   rules:
     - field: total_land_ha
       operator: ">"
       value: 0
       error: "Must own land to avail KCC"
+  application_form:
+    - key: full_name
+      label: Full Name
+      type: text
+      required: true
+      autofill_from: full_name
+    - key: mobile
+      label: Mobile Number
+      type: text
+      required: true
+      autofill_from: mobile
+    - key: bank_name
+      label: Bank Name
+      type: text
+      required: true
+      autofill_from: bank_name
+    - key: ifsc
+      label: IFSC Code
+      type: text
+      required: true
+      autofill_from: ifsc
+    - key: credit_limit_requested
+      label: Requested Credit Limit
+      type: number
+      required: false
