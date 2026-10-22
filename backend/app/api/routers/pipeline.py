@@ -1,4 +1,4 @@
-"""Pipeline router — POST /pipeline/ingest and POST /pipeline/preprocess."""
+"""Pipeline router — POST /pipeline/ingest, /preprocess, /resolve, /evaluate."""
 
 from __future__ import annotations
 
@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.schemas.pipeline import PipelineResponse
+from app.services.duplicate_service import DuplicateService
+from app.services.eligibility_service import EligibilityService
 from app.services.ingestion_service import IngestionService
 from app.services.preprocessing_service import PreprocessingService
 from app.services.resolution_service import ResolutionService
@@ -63,4 +65,20 @@ def resolve(
 ) -> PipelineResponse:
     """Trigger entity resolution: blocking → scoring → clustering → golden records."""
     background_tasks.add_task(_run_resolve, db)
+    return PipelineResponse(status="accepted")
+
+
+def _run_evaluate(db: Session) -> None:
+    DuplicateService(db).run()
+    EligibilityService(db).run()
+    db.close()
+
+
+@router.post("/evaluate", response_model=PipelineResponse, status_code=202)
+def evaluate(
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> PipelineResponse:
+    """Trigger duplicate-rule checks + eligibility evaluation on resolved farmers."""
+    background_tasks.add_task(_run_evaluate, db)
     return PipelineResponse(status="accepted")

@@ -17,8 +17,10 @@ from sqlalchemy.orm import Session
 from app.models.clean_record import CleanRecord
 from app.models.farmer import Farmer
 from app.models.farmer_link import FarmerLink
+from app.models.flag import Flag
 from app.models.land_parcel import LandParcel
 from app.models.match_candidate import MatchCandidate
+from app.models.recommendation import Recommendation
 from app.models.source_record import SourceRecord
 from app.resolution.blocking import PhoneticVillageBlocker, Record
 from app.resolution.clustering import build_clusters, passes_chain_guard
@@ -127,7 +129,9 @@ class ResolutionService:
         # ------------------------------------------------------------------ #
         # Step 5: Build Farmer golden records
         # ------------------------------------------------------------------ #
-        # Wipe existing farmers + links + parcels for clean run
+        # Wipe existing farmers + links + parcels + flags + recs for clean run
+        db.query(Recommendation).delete()
+        db.query(Flag).delete()
         db.query(LandParcel).delete()
         db.query(FarmerLink).delete()
         db.query(Farmer).delete()

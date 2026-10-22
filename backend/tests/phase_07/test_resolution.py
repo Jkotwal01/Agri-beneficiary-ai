@@ -206,6 +206,9 @@ def test_golden_record_prefers_agristack():
 def populated_db():
     Base.metadata.create_all(bind=engine)
     db: Session = TestingSession()
+    db.execute(text("DELETE FROM recommendations"))
+    db.execute(text("DELETE FROM flags"))
+    db.execute(text("DELETE FROM land_parcels"))
     db.execute(text("DELETE FROM farmer_links"))
     db.execute(text("DELETE FROM farmers"))
     db.execute(text("DELETE FROM match_candidates"))
@@ -220,6 +223,9 @@ def populated_db():
     try:
         yield db
     finally:
+        db.execute(text("DELETE FROM recommendations"))
+        db.execute(text("DELETE FROM flags"))
+        db.execute(text("DELETE FROM land_parcels"))
         db.execute(text("DELETE FROM farmer_links"))
         db.execute(text("DELETE FROM farmers"))
         db.execute(text("DELETE FROM match_candidates"))
