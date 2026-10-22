@@ -1,6 +1,7 @@
 """
 DuplicateService — runs all 5 duplicate rules against every farmer and persists flags.
 """
+
 from __future__ import annotations
 
 from sqlalchemy.orm import Session
@@ -44,9 +45,9 @@ class DuplicateService:
 
         total_flags = 0
         for farmer in farmers:
-            enrollments = db.query(Enrollment).filter(
-                Enrollment.farmer_id == farmer.id
-            ).all()
+            enrollments = (
+                db.query(Enrollment).filter(Enrollment.farmer_id == farmer.id).all()
+            )
             enroll_dicts = [
                 {
                     "scheme_id": e.scheme_id,
@@ -58,10 +59,7 @@ class DuplicateService:
 
             mobile = farmer.mobile or ""
             bank_key = mobile[-4:] if len(mobile) >= 4 else ""
-            shared = [
-                fid for fid in bank_map.get(bank_key, [])
-                if fid != farmer.id
-            ]
+            shared = [fid for fid in bank_map.get(bank_key, []) if fid != farmer.id]
 
             facts = {
                 "enrollments": enroll_dicts,
@@ -73,13 +71,15 @@ class DuplicateService:
 
             for rule in RULES:
                 for fd in rule.check(farmer.id, facts):
-                    db.add(Flag(
-                        farmer_id=farmer.id,
-                        type=fd.rule,
-                        severity=fd.severity,
-                        reason=fd.message,
-                        status="open",
-                    ))
+                    db.add(
+                        Flag(
+                            farmer_id=farmer.id,
+                            type=fd.rule,
+                            severity=fd.severity,
+                            reason=fd.message,
+                            status="open",
+                        )
+                    )
                     total_flags += 1
 
         db.commit()
