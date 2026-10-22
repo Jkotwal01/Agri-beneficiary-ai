@@ -1,4 +1,5 @@
 """Flags router — GET /flags, PATCH /flags/{id}."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,12 +49,14 @@ def update_flag(
         db.flush()
 
     flag.status = body.status
-    db.add(AuditLog(
-        user_id=user.id,
-        action=f"flag_status→{body.status}",
-        entity="flags",
-        entity_id=flag_id,
-    ))
+    db.add(
+        AuditLog(
+            user_id=user.id,
+            action=f"flag_status→{body.status}",
+            entity="flags",
+            entity_id=flag_id,
+        )
+    )
     db.commit()
     db.refresh(flag)
     return flag

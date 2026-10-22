@@ -41,8 +41,8 @@ FEATURE_ORDER = [
 Decision = Literal["auto_link", "review", "no_match"]
 
 # Thresholds read from settings so they can be tuned via .env without code changes
-THRESHOLD_LINK: float = settings.AUTO_LINK_THRESHOLD    # default 0.90
-THRESHOLD_REVIEW: float = settings.REVIEW_THRESHOLD     # default 0.60
+THRESHOLD_LINK: float = settings.AUTO_LINK_THRESHOLD  # default 0.90
+THRESHOLD_REVIEW: float = settings.REVIEW_THRESHOLD  # default 0.60
 
 
 def _decision(score: float) -> Decision:

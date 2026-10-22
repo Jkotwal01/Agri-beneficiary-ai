@@ -1,4 +1,5 @@
 """Pydantic schemas for flags."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -20,4 +21,4 @@ class FlagOut(BaseModel):
 
 
 class FlagPatch(BaseModel):
-    status: str   # open | confirmed | dismissed
+    status: str  # open | confirmed | dismissed

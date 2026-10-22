@@ -3,6 +3,7 @@ Eligibility Engine — evaluates a farmer's facts against YAML scheme rules.
 
 evaluate(scheme_rules, facts) -> EligibilityResult
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -38,9 +39,9 @@ def _check_rule(rule: dict, facts: dict) -> str | None:
 
     ops = {
         "<=": lambda a, b: a <= b,
-        "<":  lambda a, b: a < b,
+        "<": lambda a, b: a < b,
         ">=": lambda a, b: a >= b,
-        ">":  lambda a, b: a > b,
+        ">": lambda a, b: a > b,
         "==": lambda a, b: a == b,
         "!=": lambda a, b: a != b,
         "in": lambda a, b: a in b,
@@ -58,8 +59,11 @@ def evaluate(scheme_name: str, facts: dict[str, Any]) -> EligibilityResult:
     schemes = _load_schemes()
     cfg = schemes.get(scheme_name)
     if not cfg or not cfg.get("active", True):
-        return EligibilityResult(scheme=scheme_name, eligible=False,
-                                 reasons=["Scheme not active or not found"])
+        return EligibilityResult(
+            scheme=scheme_name,
+            eligible=False,
+            reasons=["Scheme not active or not found"],
+        )
     failures: list[str] = []
     for rule in cfg.get("rules", []):
         err = _check_rule(rule, facts)
@@ -75,4 +79,8 @@ def evaluate(scheme_name: str, facts: dict[str, Any]) -> EligibilityResult:
 def evaluate_all(facts: dict[str, Any]) -> list[EligibilityResult]:
     """Evaluate all active schemes against farmer facts."""
     schemes = _load_schemes()
-    return [evaluate(name, facts) for name, cfg in schemes.items() if cfg.get("active", True)]
+    return [
+        evaluate(name, facts)
+        for name, cfg in schemes.items()
+        if cfg.get("active", True)
+    ]
