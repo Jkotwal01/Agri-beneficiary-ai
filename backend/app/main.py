@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers.applications import router as applications_router
 from app.api.routers.auth import router as auth_router
+from app.api.routers.evaluation import router as evaluation_router
 from app.api.routers.exclusions import router as exclusions_router
 from app.api.routers.farmers import router as farmers_router
 from app.api.routers.flags import router as flags_router
@@ -34,6 +35,7 @@ app.include_router(exclusions_router)
 app.include_router(me_router)
 app.include_router(applications_router)
 app.include_router(schemes_router)
+app.include_router(evaluation_router)
 
 
 @app.get("/health")
