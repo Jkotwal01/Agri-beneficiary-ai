@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16
+    container_name: agri_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agri
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: agri_mailhog
+    restart: always
+    ports:
+      - "1025:1025"   # SMTP port
+      - "8025:8025"   # Web UI for emails
+volumes:
+  pgdata:
