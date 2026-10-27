@@ -2,7 +2,7 @@ import { Settings, Save, AlertCircle } from "lucide-react";
 import { useFlags } from "../hooks/useFlags";
 
 export default function FlagsPage() {
-  const { flags, loading, error } = useFlags();
+  const { flags, loading, error, updateStatus } = useFlags();
 
   return (
     <div className="h-full flex gap-4">
@@ -124,8 +124,18 @@ export default function FlagsPage() {
                     {flag.reason}
                   </p>
                   <div className="mt-3 flex justify-end space-x-2">
-                     <button className="px-2 py-1 border border-borderline text-xs font-semibold text-secondary hover:bg-slate-50 rounded-sm transition-colors">Dismiss</button>
-                     <button className="px-2 py-1 bg-primary text-white text-xs font-semibold hover:bg-slate-800 rounded-sm transition-colors">Investigate</button>
+                     <button
+                       onClick={() => updateStatus(flag.id, 'dismissed')}
+                       className="px-2 py-1 border border-borderline text-xs font-semibold text-secondary hover:bg-slate-50 rounded-sm transition-colors"
+                     >
+                       Dismiss
+                     </button>
+                     <button
+                       onClick={() => updateStatus(flag.id, 'confirmed')}
+                       className="px-2 py-1 bg-primary text-white text-xs font-semibold hover:bg-slate-800 rounded-sm transition-colors"
+                     >
+                       Investigate
+                     </button>
                   </div>
                 </div>
               </div>

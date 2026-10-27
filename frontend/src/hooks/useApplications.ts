@@ -49,8 +49,8 @@ export function useOfficerApplications() {
     };
   }, []);
 
-  async function decide(id: number, decision: "approved" | "rejected") {
-    await decideApplication(id, decision);
+  async function decide(id: number, decision: "approved" | "rejected", note?: string) {
+    await decideApplication(id, decision, note);
     setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: decision } : a)));
   }
 

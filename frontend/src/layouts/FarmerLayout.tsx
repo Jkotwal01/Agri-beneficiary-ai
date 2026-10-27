@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { LayoutDashboard, FileText, Settings, LogOut, Sprout } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut, Sprout, User } from "lucide-react";
 
 export default function FarmerLayout() {
   const { logout } = useAuthContext();
@@ -8,6 +8,7 @@ export default function FarmerLayout() {
 
   const navItems = [
     { name: "Schemes", to: "/me", icon: LayoutDashboard },
+    { name: "My Profile", to: "/me/profile", icon: User },
     { name: "My Applications", to: "/me/applications", icon: FileText },
     { name: "Settings", to: "/me/settings", icon: Settings },
   ];

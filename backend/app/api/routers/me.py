@@ -15,11 +15,18 @@ router = APIRouter(prefix="/me", tags=["me"])
 
 
 def _get_or_create_profile(db: Session, user_id: int) -> FarmerProfile:
+    """Return the farmer's profile, auto-creating an empty shell if not yet present.
+
+    This prevents newly-registered farmers from seeing a hard 404 on their
+    first visit to /me — instead the UI receives an empty profile with
+    completeness=0 and can show the "Build your profile" prompt.
+    """
     profile = db.query(FarmerProfile).filter(FarmerProfile.user_id == user_id).first()
     if profile is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found"
-        )
+        profile = FarmerProfile(user_id=user_id, completeness=0, verified=False)
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
     return profile
 
 
