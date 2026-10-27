@@ -4,7 +4,7 @@ import { useAuthContext } from "../context/AuthContext";
 import { LayoutDashboard, GitMerge, Flag, FileCheck, BarChart3, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export default function OfficerLayout() {
-  const { logout } = useAuthContext();
+  const { logout, role } = useAuthContext();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
 
@@ -13,7 +13,8 @@ export default function OfficerLayout() {
     { name: "Review Queue", to: "/dashboard/review", icon: GitMerge },
     { name: "Rule Engine", to: "/dashboard/flags", icon: Flag },
     { name: "Applications", to: "/dashboard/applications", icon: FileCheck },
-    { name: "Evaluation", to: "/dashboard/evaluation", icon: BarChart3 },
+    // Evaluation metrics endpoint is admin-only; hide for officers to avoid "Access denied" (DEF-08)
+    ...(role === "admin" ? [{ name: "Evaluation", to: "/dashboard/evaluation", icon: BarChart3 }] : []),
   ];
 
   return (

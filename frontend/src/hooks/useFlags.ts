@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchFlags } from "../api/flags";
+import { fetchFlags, updateFlagStatus } from "../api/flags";
 import type { FlagItem } from "../types/flag";
 
 export function useFlags() {
@@ -24,5 +24,10 @@ export function useFlags() {
     };
   }, []);
 
-  return { flags, error, loading };
+  async function updateStatus(id: number, status: "dismissed" | "confirmed") {
+    const updated = await updateFlagStatus(id, status);
+    setFlags((prev) => prev.map((f) => (f.id === id ? updated : f)));
+  }
+
+  return { flags, error, loading, updateStatus };
 }
