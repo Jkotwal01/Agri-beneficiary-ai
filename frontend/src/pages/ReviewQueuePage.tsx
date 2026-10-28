@@ -162,6 +162,7 @@ function RecordDetails({ record }: { record: CleanRecord | null }) {
     { label: "Normalized Name", key: "name_norm" },
     { label: "Mobile (10 digit)", key: "mobile10" },
     { label: "District Code", key: "district_code" },
+    { label: "Village Code", key: "village_code" },
     { label: "Survey Number", key: "survey_no" },
     { label: "Date of Birth", key: "dob" },
   ];
