@@ -52,6 +52,7 @@ def seeded_db():
     db: Session = TestingSession()
 
     for table in (
+        "email_log",
         "audit_log",
         "enrollments",
         "scheme_applications",

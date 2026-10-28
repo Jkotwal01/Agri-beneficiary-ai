@@ -11,6 +11,7 @@ const OfficerLayout = React.lazy(() => import("./layouts/OfficerLayout"));
 const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const ReviewQueuePage = React.lazy(() => import("./pages/ReviewQueuePage"));
 const FlagsPage = React.lazy(() => import("./pages/FlagsPage"));
+const RulesPage = React.lazy(() => import("./pages/RulesPage"));
 const OfficerApplicationsPage = React.lazy(() => import("./pages/OfficerApplicationsPage"));
 const EvaluationPage = React.lazy(() => import("./pages/EvaluationPage"));
 
@@ -83,6 +84,7 @@ export function AppRoutes() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="review" element={<ReviewQueuePage />} />
+          <Route path="rules" element={<RulesPage />} />
           <Route path="flags" element={<FlagsPage />} />
           <Route path="applications" element={<OfficerApplicationsPage />} />
           <Route path="evaluation" element={<EvaluationPage />} />

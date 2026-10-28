@@ -6,6 +6,7 @@ export function useFlags() {
   const [flags, setFlags] = useState<FlagItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +26,15 @@ export function useFlags() {
   }, []);
 
   async function updateStatus(id: number, status: "dismissed" | "confirmed") {
-    const updated = await updateFlagStatus(id, status);
-    setFlags((prev) => prev.map((f) => (f.id === id ? updated : f)));
+    setUpdatingId(id);
+    try {
+      const updated = await updateFlagStatus(id, status);
+      setFlags((prev) => prev.map((f) => (f.id === id ? updated : f)));
+      return updated;
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
-  return { flags, error, loading, updateStatus };
+  return { flags, error, loading, updateStatus, updatingId };
 }

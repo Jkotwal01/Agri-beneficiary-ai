@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
-import { LayoutDashboard, GitMerge, Flag, FileCheck, BarChart3, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, GitMerge, Flag, Sliders, FileCheck, BarChart3, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export default function OfficerLayout() {
   const { logout, role } = useAuthContext();
@@ -11,7 +11,8 @@ export default function OfficerLayout() {
   const navItems = [
     { name: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
     { name: "Review Queue", to: "/dashboard/review", icon: GitMerge },
-    { name: "Rule Engine", to: "/dashboard/flags", icon: Flag },
+    { name: "Validation Rules", to: "/dashboard/rules", icon: Sliders },
+    { name: "Flags & Violations", to: "/dashboard/flags", icon: Flag },
     { name: "Applications", to: "/dashboard/applications", icon: FileCheck },
     // Evaluation metrics endpoint is admin-only; hide for officers to avoid "Access denied" (DEF-08)
     ...(role === "admin" ? [{ name: "Evaluation", to: "/dashboard/evaluation", icon: BarChart3 }] : []),

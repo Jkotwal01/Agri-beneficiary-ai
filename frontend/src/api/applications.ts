@@ -41,8 +41,17 @@ export async function fetchMyApplications(): Promise<Application[]> {
   return res.json();
 }
 
-export async function fetchAllApplications(): Promise<Application[]> {
-  const res = await fetch(`${BASE}/applications`, { headers: authHeaders() });
+export async function fetchAllApplications(params?: {
+  status_filter?: string;
+  farmer_id?: number;
+  search?: string;
+}): Promise<Application[]> {
+  const url = new URL(`${BASE}/applications`);
+  if (params?.status_filter) url.searchParams.set("status_filter", params.status_filter);
+  if (params?.farmer_id !== undefined) url.searchParams.set("farmer_id", params.farmer_id.toString());
+  if (params?.search) url.searchParams.set("search", params.search);
+
+  const res = await fetch(url.toString(), { headers: authHeaders() });
   if (!res.ok) throw new Error("Failed to load applications");
   return res.json();
 }

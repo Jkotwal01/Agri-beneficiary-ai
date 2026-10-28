@@ -27,14 +27,19 @@ export function useMyApplications() {
   return { applications, loading, error };
 }
 
-export function useOfficerApplications() {
+export function useOfficerApplications(params?: {
+  status_filter?: string;
+  farmer_id?: number;
+  search?: string;
+}) {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
     let cancelled = false;
-    fetchAllApplications()
+    fetchAllApplications(params)
       .then((data) => {
         if (!cancelled) setApplications(data);
       })
@@ -47,12 +52,21 @@ export function useOfficerApplications() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  };
+
+  useEffect(() => {
+    return loadData();
+  }, [params?.status_filter, params?.farmer_id, params?.search]);
 
   async function decide(id: number, decision: "approved" | "rejected", note?: string) {
-    await decideApplication(id, decision, note);
-    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: decision } : a)));
+    const updated = await decideApplication(id, decision, note);
+    setApplications((prev) =>
+      prev.map((a) =>
+        a.id === id ? { ...a, ...updated, status: decision, officer_note: note ?? null } : a
+      )
+    );
+    return updated;
   }
 
-  return { applications, loading, error, decide };
+  return { applications, loading, error, decide, reload: loadData };
 }

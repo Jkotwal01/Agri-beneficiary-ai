@@ -42,6 +42,28 @@ class ApplicationOut(BaseModel):
     reviewed_by: int | None = None
     officer_note: str | None = None
 
+    # Enriched applicant & scheme details for real-world officer audits
+    applicant_name: str | None = None
+    father_name: str | None = None
+    farmer_id: int | None = None
+    mobile: str | None = None
+    email: str | None = None
+    village: str | None = None
+    taluka: str | None = None
+    district: str | None = None
+    state: str | None = None
+    category: str | None = None
+    total_land_ha: float | None = None
+    ownership_type: str | None = None
+    main_crops: list[str] | None = None
+    bank_name: str | None = None
+    ifsc: str | None = None
+    agristack_id: str | None = None
+    scheme_name: str | None = None
+    scheme_code: str | None = None
+    flags_count: int = 0
+    flags: list[dict[str, Any]] = []
+
     model_config = {"from_attributes": True}
 
 
