@@ -76,10 +76,10 @@ export default function FlagsPage() {
   }, [filteredFlags, safePage, pageSize]);
 
   // Reset to page 1 whenever any filter or search changes
-  const handleFilterChange = (setter: (val: any) => void, val: any) => {
+  function handleFilterChange<T>(setter: (val: T) => void, val: T) {
     setter(val);
     setCurrentPage(1);
-  };
+  }
 
   const handleUpdate = async (id: number, status: "dismissed" | "confirmed", farmerName?: string | null) => {
     try {

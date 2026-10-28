@@ -29,17 +29,13 @@ def seed_applications():
 
         # 1. Get first 35 distinct farmer_ids that have flags
         flagged_farmer_ids = [
-            f_id
-            for (f_id,) in db.query(Flag.farmer_id).distinct().limit(35).all()
+            f_id for (f_id,) in db.query(Flag.farmer_id).distinct().limit(35).all()
         ]
 
         # 2. Get 15 clean farmers (without flags)
         all_flagged_set = set(flagged_farmer_ids)
         clean_farmers = (
-            db.query(Farmer)
-            .filter(~Farmer.id.in_(all_flagged_set))
-            .limit(15)
-            .all()
+            db.query(Farmer).filter(~Farmer.id.in_(all_flagged_set)).limit(15).all()
         )
         clean_farmer_ids = [f.id for f in clean_farmers]
 
@@ -67,28 +63,40 @@ def seed_applications():
                 db.flush()
 
             # Check / create FarmerProfile
-            profile = db.query(FarmerProfile).filter(FarmerProfile.user_id == user.id).first()
+            profile = (
+                db.query(FarmerProfile).filter(FarmerProfile.user_id == user.id).first()
+            )
             if not profile:
                 profile = FarmerProfile(
                     user_id=user.id,
                     farmer_id=farmer.id,
                     full_name=farmer.name.title(),
-                    father_name=(farmer.father_name.title() if farmer.father_name else f"Govind {farmer.name.split()[-1].title()}"),
+                    father_name=(
+                        farmer.father_name.title()
+                        if farmer.father_name
+                        else f"Govind {farmer.name.split()[-1].title()}"
+                    ),
                     dob=farmer.dob or "1978-08-15",
                     gender="Male" if idx % 3 != 0 else "Female",
                     mobile=farmer.mobile or f"98230{farmer.id:05d}",
                     email=email,
-                    category=farmer.category or ("Small & Marginal" if idx % 2 == 0 else "General"),
+                    category=farmer.category
+                    or ("Small & Marginal" if idx % 2 == 0 else "General"),
                     village=farmer.village_code or "Ralegaon",
                     taluka="Yavatmal",
                     district=farmer.district_code or "Nagpur",
                     state="Maharashtra",
                     pincode="445001",
-                    total_land_ha=farmer.total_land_ha or round(random.uniform(1.2, 4.5), 2),
+                    total_land_ha=farmer.total_land_ha
+                    or round(random.uniform(1.2, 4.5), 2),
                     ownership_type="Individual Ownership",
                     main_crops=["Soybean", "Cotton", "Paddy"],
                     irrigation_type="Canal / Well",
-                    interests=["Direct Benefit Transfer", "Subsidies", "Crop Insurance"],
+                    interests=[
+                        "Direct Benefit Transfer",
+                        "Subsidies",
+                        "Crop Insurance",
+                    ],
                     agristack_id=f"AGRI-MH-{farmer.id:06d}",
                     bank_name="State Bank of India",
                     ifsc="SBIN0004521",
@@ -118,7 +126,9 @@ def seed_applications():
                 chosen_scheme = schemes[idx % len(schemes)]
 
             submitted_days_ago = random.randint(1, 14)
-            submitted_time = now - timedelta(days=submitted_days_ago, hours=random.randint(1, 12))
+            submitted_time = now - timedelta(
+                days=submitted_days_ago, hours=random.randint(1, 12)
+            )
 
             # Decide status: 70% submitted (pending review), 15% approved, 15% rejected
             status_dice = random.random()
@@ -128,11 +138,15 @@ def seed_applications():
                 reviewed_by = None
             elif status_dice < 0.85:
                 app_status = "approved"
-                officer_note = "All land holding documents verified with AgriStack geo-registry."
+                officer_note = (
+                    "All land holding documents verified with AgriStack geo-registry."
+                )
                 reviewed_by = 1
             else:
                 app_status = "rejected"
-                officer_note = "Land holding ceiling exceeded according to survey records."
+                officer_note = (
+                    "Land holding ceiling exceeded according to survey records."
+                )
                 reviewed_by = 1
 
             form_data = {
@@ -157,7 +171,15 @@ def seed_applications():
                 scheme_id=chosen_scheme.id,
                 status=app_status,
                 form_data=form_data,
-                autofilled_keys=["full_name", "mobile", "village", "district", "total_land_ha", "bank_name", "ifsc"],
+                autofilled_keys=[
+                    "full_name",
+                    "mobile",
+                    "village",
+                    "district",
+                    "total_land_ha",
+                    "bank_name",
+                    "ifsc",
+                ],
                 submitted_at=submitted_time,
                 reviewed_by=reviewed_by,
                 officer_note=officer_note,
@@ -166,7 +188,9 @@ def seed_applications():
             created_apps += 1
 
         db.commit()
-        print(f"Successfully seeded {created_apps} realistic applications with profiles!")
+        print(
+            f"Successfully seeded {created_apps} realistic applications with profiles!"
+        )
 
     except Exception as e:
         db.rollback()

@@ -159,12 +159,10 @@ def list_applications(
         ]
         q = q.filter(SchemeApplication.farmer_profile_id.in_(profile_ids))
 
-    apps = (
-        q.order_by(
-            SchemeApplication.submitted_at.desc().nullslast(),
-            SchemeApplication.id.desc(),
-        ).all()
-    )
+    apps = q.order_by(
+        SchemeApplication.submitted_at.desc().nullslast(),
+        SchemeApplication.id.desc(),
+    ).all()
     enriched = [_enrich_application(db, app) for app in apps]
 
     if search:

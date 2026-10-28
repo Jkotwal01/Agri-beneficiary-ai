@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Check,
@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useOfficerApplications } from "../hooks/useApplications";
 import { useAllSchemes } from "../hooks/useSchemes";
-import type { Application } from "../types/application";
 
 export default function OfficerApplicationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,36 +30,38 @@ export default function OfficerApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  // Selected application for Inspection Dossier Modal
-  const [inspectedApp, setInspectedApp] = useState<Application | null>(null);
+  // Selected application ID for Inspection Dossier Modal (-1 means explicitly closed)
+  const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
+
+  const activeAppId = useMemo(() => {
+    if (selectedAppId === -1) return null;
+    if (selectedAppId !== null) return selectedAppId;
+    if (parsedFarmerId !== undefined) {
+      return applications.find((a) => a.farmer_id === parsedFarmerId)?.id ?? null;
+    }
+    return null;
+  }, [selectedAppId, parsedFarmerId, applications]);
+
+  const inspectedApp = useMemo(() => {
+    if (activeAppId === null) return null;
+    return applications.find((a) => a.id === activeAppId) ?? null;
+  }, [applications, activeAppId]);
 
   // Rejection modal state (DEF-04)
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectNote, setRejectNote] = useState("");
 
-  // Auto-open dossier if farmer_id matches exactly one application
-  useEffect(() => {
-    if (parsedFarmerId && applications.length > 0 && !inspectedApp) {
-      const match = applications.find((a) => a.farmer_id === parsedFarmerId);
-      if (match) {
-        setInspectedApp(match);
-      }
-    }
-  }, [parsedFarmerId, applications]);
-
-  const schemeName = (schemeId: number, fallbackCode?: string | null) => {
-    return schemes.find((s) => s.id === schemeId)?.name ?? fallbackCode ?? `Scheme #${schemeId}`;
-  };
+  const schemeName = useCallback(
+    (schemeId: number, fallbackCode?: string | null) => {
+      return schemes.find((s) => s.id === schemeId)?.name ?? fallbackCode ?? `Scheme #${schemeId}`;
+    },
+    [schemes]
+  );
 
   async function handleDecision(id: number, decision: "approved" | "rejected", note?: string) {
     setBusyId(id);
     try {
-      const updated = await decide(id, decision, note);
-      if (inspectedApp && inspectedApp.id === id) {
-        setInspectedApp((prev) =>
-          prev ? { ...prev, ...updated, status: decision, officer_note: note ?? null } : null
-        );
-      }
+      await decide(id, decision, note);
     } finally {
       setBusyId(null);
     }
@@ -106,7 +107,7 @@ export default function OfficerApplicationsPage() {
 
       return true;
     });
-  }, [applications, parsedFarmerId, statusFilter, searchQuery, schemes]);
+  }, [applications, parsedFarmerId, statusFilter, searchQuery, schemeName]);
 
   // Counts
   const pendingCount = useMemo(() => applications.filter((a) => a.status === "submitted").length, [applications]);
@@ -248,7 +249,7 @@ export default function OfficerApplicationsPage() {
                 <tr
                   key={app.id}
                   className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                  onClick={() => setInspectedApp(app)}
+                  onClick={() => setSelectedAppId(app.id)}
                 >
                   {/* ID */}
                   <td className="px-3 py-2.5 font-mono text-xs font-semibold text-secondary">
@@ -342,7 +343,7 @@ export default function OfficerApplicationsPage() {
                   >
                     <div className="flex items-center space-x-1.5">
                       <button
-                        onClick={() => setInspectedApp(app)}
+                        onClick={() => setSelectedAppId(app.id)}
                         className="flex items-center px-2 py-1 bg-white border border-borderline text-secondary hover:text-primary hover:bg-slate-50 text-xs font-semibold rounded-sm transition-colors shadow-sm"
                         title="View Complete Beneficiary Dossier"
                       >
@@ -422,7 +423,7 @@ export default function OfficerApplicationsPage() {
                 </span>
 
                 <button
-                  onClick={() => setInspectedApp(null)}
+                  onClick={() => setSelectedAppId(-1)}
                   className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
                 >
                   <X className="w-5 h-5" />
@@ -626,7 +627,7 @@ export default function OfficerApplicationsPage() {
             {/* Modal Adjudication Footer */}
             <div className="px-5 py-3.5 bg-slate-50 border-t border-borderline flex items-center justify-between shrink-0">
               <button
-                onClick={() => setInspectedApp(null)}
+                onClick={() => setSelectedAppId(-1)}
                 className="px-3 py-1.5 border border-borderline text-xs font-semibold text-secondary hover:bg-slate-100 rounded-sm transition-colors"
               >
                 Close Dossier

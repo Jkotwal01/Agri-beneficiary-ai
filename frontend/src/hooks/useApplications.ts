@@ -36,10 +36,17 @@ export function useOfficerApplications(params?: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadData = () => {
-    setLoading(true);
+  const statusFilter = params?.status_filter;
+  const farmerId = params?.farmer_id;
+  const search = params?.search;
+
+  useEffect(() => {
     let cancelled = false;
-    fetchAllApplications(params)
+    fetchAllApplications({
+      status_filter: statusFilter,
+      farmer_id: farmerId,
+      search,
+    })
       .then((data) => {
         if (!cancelled) setApplications(data);
       })
@@ -52,11 +59,7 @@ export function useOfficerApplications(params?: {
     return () => {
       cancelled = true;
     };
-  };
-
-  useEffect(() => {
-    return loadData();
-  }, [params?.status_filter, params?.farmer_id, params?.search]);
+  }, [statusFilter, farmerId, search]);
 
   async function decide(id: number, decision: "approved" | "rejected", note?: string) {
     const updated = await decideApplication(id, decision, note);
@@ -68,5 +71,5 @@ export function useOfficerApplications(params?: {
     return updated;
   }
 
-  return { applications, loading, error, decide, reload: loadData };
+  return { applications, loading, error, decide };
 }
