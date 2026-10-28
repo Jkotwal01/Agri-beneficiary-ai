@@ -117,12 +117,20 @@ def _enrich_application(db: Session, app: SchemeApplication) -> ApplicationOut:
             ]
 
     # If form_data has full_name or mobile, use it as fallback
-    if not out.applicant_name and app.form_data and isinstance(app.form_data, dict):
-        if "full_name" in app.form_data:
-            out.applicant_name = str(app.form_data["full_name"])
-    if not out.mobile and app.form_data and isinstance(app.form_data, dict):
-        if "mobile" in app.form_data:
-            out.mobile = str(app.form_data["mobile"])
+    if (
+        not out.applicant_name
+        and app.form_data
+        and isinstance(app.form_data, dict)
+        and "full_name" in app.form_data
+    ):
+        out.applicant_name = str(app.form_data["full_name"])
+    if (
+        not out.mobile
+        and app.form_data
+        and isinstance(app.form_data, dict)
+        and "mobile" in app.form_data
+    ):
+        out.mobile = str(app.form_data["mobile"])
 
     return out
 

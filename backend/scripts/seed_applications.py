@@ -6,7 +6,7 @@ so the Officer Inbox has real, rich, interactive beneficiary dossiers.
 from __future__ import annotations
 
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.core.db import SessionLocal
 from app.models.farmer import Farmer
@@ -47,7 +47,7 @@ def seed_applications():
         print(f"Targeting {len(target_farmer_ids)} farmers for application seeding...")
 
         created_apps = 0
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         for idx, farmer_id in enumerate(target_farmer_ids):
             farmer = db.get(Farmer, farmer_id)
